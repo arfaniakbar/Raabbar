@@ -622,37 +622,39 @@ def thread_timbangan():
 
             if loadcell_medis_enabled.is_set():
                 data_m = ambil_sampel(MEDIS_DT, MEDIS_SCK, SAMPEL_BACA, jeda_ms=5)
-                raw_m, _ = rata_bersih(data_m)
-                berat_m = (raw_m - nol_medis) / MEDIS_FAKTOR
-                if abs(berat_m) < dz_medis:
-                    berat_m = 0.0
+                if data_m:
+                    raw_m, _ = rata_bersih(data_m)
+                    berat_m = (raw_m - nol_medis) / MEDIS_FAKTOR
+                    if abs(berat_m) < dz_medis:
+                        berat_m = 0.0
 
-                if abs(berat_m - berat_m_prev) > 20:
-                    hist_medis.clear()
-                berat_m_prev = berat_m
+                    if abs(berat_m - berat_m_prev) > 20:
+                        hist_medis.clear()
+                    berat_m_prev = berat_m
 
-                hist_medis.append(berat_m)
-                if len(hist_medis) > WINDOW_TAMPIL:
-                    hist_medis.pop(0)
+                    hist_medis.append(berat_m)
+                    if len(hist_medis) > WINDOW_TAMPIL:
+                        hist_medis.pop(0)
 
-                tampil_m = max(0.0, round(statistics.mean(hist_medis), 1))
+                    tampil_m = max(0.0, round(statistics.mean(hist_medis), 1))
 
             if loadcell_non_medis_enabled.is_set():
                 data_n = ambil_sampel(NONMEDIS_DT, NONMEDIS_SCK, SAMPEL_BACA, jeda_ms=5)
-                raw_n, _ = rata_bersih(data_n)
-                berat_n = (raw_n - nol_nonmedis) / NONMEDIS_FAKTOR
-                if abs(berat_n) < dz_nonmedis:
-                    berat_n = 0.0
+                if data_n:
+                    raw_n, _ = rata_bersih(data_n)
+                    berat_n = (raw_n - nol_nonmedis) / NONMEDIS_FAKTOR
+                    if abs(berat_n) < dz_nonmedis:
+                        berat_n = 0.0
 
-                if abs(berat_n - berat_n_prev) > 20:
-                    hist_nonmedis.clear()
-                berat_n_prev = berat_n
+                    if abs(berat_n - berat_n_prev) > 20:
+                        hist_nonmedis.clear()
+                    berat_n_prev = berat_n
 
-                hist_nonmedis.append(berat_n)
-                if len(hist_nonmedis) > WINDOW_TAMPIL:
-                    hist_nonmedis.pop(0)
+                    hist_nonmedis.append(berat_n)
+                    if len(hist_nonmedis) > WINDOW_TAMPIL:
+                        hist_nonmedis.pop(0)
 
-                tampil_n = max(0.0, round(statistics.mean(hist_nonmedis), 1))
+                    tampil_n = max(0.0, round(statistics.mean(hist_nonmedis), 1))
 
             update_state("weight", {
                 "medis": {"gram": tampil_m},
