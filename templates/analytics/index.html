@@ -136,7 +136,7 @@
                 <thead class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
                     <tr>
                         <th class="px-5 py-3 text-left font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-xs">Kategori</th>
-                        <th class="px-5 py-3 text-left font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-xs">Berat</th>
+
                         <th class="px-5 py-3 text-left font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-xs">Jam</th>
                         <th class="px-5 py-3 text-left font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-xs">Tanggal</th>
                     </tr>
@@ -156,16 +156,13 @@
                             </span>
                             {% endif %}
                         </td>
-                        <td class="px-5 py-3">
-                            <span class="font-semibold text-gray-900 dark:text-white tabular-nums">{{ "%.1f"|format(berat_row) }}</span>
-                            <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">g</span>
-                        </td>
+
                         <td class="px-5 py-3 text-gray-600 dark:text-gray-400 tabular-nums">{{ format_wita(log.created_at, '%H:%M') }} <span class="text-xs text-gray-400">WITA</span></td>
                         <td class="px-5 py-3 text-gray-600 dark:text-gray-400 tabular-nums">{{ format_wita(log.created_at, '%d %b %Y') }}</td>
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="4" class="px-5 py-16 text-center">
+                        <td colspan="3" class="px-5 py-16 text-center">
                             <i data-lucide="inbox" class="w-10 h-10 mx-auto text-gray-300 dark:text-gray-600 mb-2"></i>
                             <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Belum ada data pada rentang ini</p>
                         </td>
