@@ -546,8 +546,8 @@ def thread_ultrasonic():
 
     def cek_kapasitas(jarak):
         if jarak is None: return "Error"
-        if jarak <= 10: return "Penuh"
-        if jarak <= 22: return "Hampir Penuh"
+        if jarak <= 30: return "Penuh"
+        if jarak <= 50: return "Hampir Penuh"
         return "Kosong"
 
     while not shutdown_event.is_set():
