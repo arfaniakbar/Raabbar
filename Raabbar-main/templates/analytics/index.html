@@ -1,0 +1,406 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<div class="space-y-6">
+
+    <!-- TITLE -->
+
+    <div>
+
+        <h1 class="text-[32px] font-bold text-[#2348c0]">
+
+            Trash Analytics
+
+        </h1>
+
+        <div class="border-b border-[#dbe5ff] mt-3"></div>
+
+    </div>
+
+    <!-- TOP CARDS -->
+
+    <div class="grid lg:grid-cols-3 gap-4">
+
+        <!-- CARD 1 -->
+
+        <div class="bg-white border border-[#dbe5ff] rounded-[18px] p-5">
+
+            <div class="flex justify-between">
+            <h3 class="text-[#2348c0] font-semibold">
+                Total Sampah Per-Minggu
+            </h3>
+                <div class="w-10 h-10 rounded-full bg-[#eef3ff] flex items-center justify-center">
+
+                    🗑️
+
+                </div>
+
+            </div>
+
+            <h2 class="text-[34px] font-bold text-[#2d6cff] mt-4">
+                {{ total_week }}
+            </h2>
+
+            <p class="text-gray-500 text-sm mt-2">
+                Data minggu berjalan
+            </p>
+
+        </div>
+
+        <!-- CARD 2 -->
+
+        <div class="bg-white border border-[#dbe5ff] rounded-[18px] p-5">
+
+            <div class="flex justify-between">
+
+            <h3 class="text-[#2348c0] font-semibold">
+                Rata-rata Harian
+            </h3>
+
+                <div class="w-10 h-10 rounded-full bg-[#eef3ff] flex items-center justify-center">
+
+                    ⏱️
+
+                </div>
+
+            </div>
+
+            <h2 class="text-[34px] font-bold text-[#2d6cff] mt-4">
+                {{ avg_daily }}/hari
+            </h2>
+
+            <p class="text-gray-500 text-sm mt-2">
+                Rata-rata sampah minggu ini
+            </p>
+
+        </div>
+
+        <!-- CARD 3 -->
+
+        <div class="bg-white border border-[#dbe5ff] rounded-[18px] p-5">
+
+            <div class="flex justify-between">
+            <h3 class="text-[#2348c0] font-semibold">
+                Kerusakan Sistem
+            </h3>
+                <div class="w-10 h-10 rounded-full bg-[#eef3ff] flex items-center justify-center">
+
+                    ✔
+
+                </div>
+
+            </div>
+
+            <h2 class="text-[34px] font-bold text-[#2d6cff] mt-4">
+                {{ error_count }}
+            </h2>
+
+            <p class="text-gray-500 text-sm mt-2">
+                Sensor bermasalah
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- MEDIS & NON MEDIS -->
+
+  <div class="grid lg:grid-cols-2 gap-4">
+
+    <!-- Medical -->
+
+    <div class="
+    bg-[#edf2fa]
+    rounded-[18px]
+    p-6
+    border border-[#dbe5ff]
+    flex items-center">
+
+        <div class="
+        w-16 h-16
+        rounded-full
+        border-2 border-[#2d6cff]
+        flex items-center justify-center
+        text-[28px]
+        text-[#2d6cff]
+        mr-5">
+
+            ➕
+
+        </div>
+
+        <div>
+
+            <h3 class="
+            text-[42px]
+            font-bold
+            leading-none
+            text-[#2348c0]">
+
+                {{ medical_count }} Sampah
+
+            </h3>
+
+            <p class="
+            text-gray-500
+            text-[20px]
+            mt-1">
+
+                Medical Trash
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- Non Medical -->
+
+    <div class="
+    bg-white
+    rounded-[18px]
+    p-6
+    border border-[#dbe5ff]
+    flex items-center">
+
+        <div class="
+        w-16 h-16
+        rounded-full
+        border-2 border-[#7da8ff]
+        flex items-center justify-center
+        text-[28px]
+        text-[#ff4d6d]
+        mr-5">
+
+            🚫
+
+        </div>
+
+        <div>
+
+            <h3 class="
+            text-[42px]
+            font-bold
+            leading-none
+            text-[#2348c0]">
+
+                {{ non_medical_count }} Sampah
+
+            </h3>
+
+            <p class="
+            text-gray-500
+            text-[20px]
+            mt-1">
+
+                Non-Medical Trash
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+    <!-- CHART SECTION -->
+
+    <div class="grid xl:grid-cols-[1fr_320px] gap-5">
+
+        <!-- LINE CHART -->
+
+        <div class="bg-white border border-[#dbe5ff] rounded-[18px] p-5">
+
+            <h2 class="text-[24px] font-bold text-[#2348c0] mb-4">
+
+                Statistik Sampah Per Minggu
+
+            </h2>
+
+            <div id="lineChart"></div>
+
+        </div>
+
+    <!-- TABLE -->
+
+    <div>
+
+        <h2 class="text-[26px] font-bold text-[#2348c0] mb-4">
+
+            Pengambilan Sampah
+
+        </h2>
+
+        <div class="overflow-hidden rounded-[18px] border">
+
+            <table class="w-full">
+
+                <thead>
+
+                    <tr class="bg-[#2348c0] text-white">
+
+                        <th class="p-4 text-left">Jenis</th>
+                        <th class="p-4 text-left">Jam</th>
+                        <th class="p-4 text-left">Tanggal</th>
+                        <th class="p-4 text-left">Opsi</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for log in latest_logs %}
+
+                <tr class="border-b hover:bg-gray-50 transition">
+
+                    <td class="p-4 font-medium">
+
+                        {% if log.kategori == "Medical" %}
+
+                            <span class="
+                            px-3 py-1
+                            rounded-full
+                            bg-blue-100
+                            text-blue-700
+                            text-sm">
+
+                                Medis
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="
+                            px-3 py-1
+                            rounded-full
+                            bg-gray-100
+                            text-gray-700
+                            text-sm">
+
+                                Non-Medis
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td class="p-4 text-gray-600">
+
+                        {{ log.created_at.strftime('%H:%M') }}
+
+                    </td>
+
+                    <td class="p-4 text-gray-600">
+
+                        {{ log.created_at.strftime('%d %b %Y') }}
+
+                    </td>
+
+                    <td class="p-4">
+
+                        <a
+                        href="{{ url_for('history') }}"
+                        class="
+                        text-green-500
+                        hover:text-green-700
+                        font-semibold">
+
+                            Detail →
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- LINE CHART -->
+
+<script id="chart-data" type="application/json">
+{
+    "labels": {{ labels|tojson }},
+    "medical": {{ medical_series|tojson }},
+    "nonmedical": {{ non_medical_series|tojson }}
+}
+</script>
+
+<script>
+
+const chartData = JSON.parse(
+    document.getElementById(
+        "chart-data"
+    ).textContent
+);
+
+var lineOptions = {
+
+    chart: {
+        type: 'line',
+        height: 320,
+        toolbar: {
+            show: false
+        }
+    },
+
+    series: [
+
+        {
+            name: 'Non-Medis',
+            data: chartData.nonmedical
+        },
+
+        {
+            name: 'Medis',
+            data: chartData.medical
+        }
+
+    ],
+
+    xaxis: {
+        categories: chartData.labels
+    },
+
+    colors: [
+        '#2bc445',
+        '#10bce2'
+    ],
+
+    stroke: {
+        curve: 'smooth',
+        width: 4
+    },
+
+    dataLabels: {
+        enabled: false
+    },
+
+    legend: {
+        position: 'bottom'
+    }
+
+};
+
+new ApexCharts(
+    document.querySelector("#lineChart"),
+    lineOptions
+).render();
+
+</script>
+
+
+
+{% endblock %}

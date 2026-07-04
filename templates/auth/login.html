@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - wastescan</title>
+    <link rel="icon" type="image/x-icon" href="/asset/img/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/asset/img/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="/asset/img/favicon-64.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/asset/img/apple-touch-icon.png">
+
+    <!-- Tailwind JIT CDN + config (same as base.html) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: { sans: ["Inter", "sans-serif"] },
+            colors: {
+              brand: {
+                50:  "#eef4ff", 100: "#dbe5ff", 200: "#bcd0ff",
+                300: "#8fb0ff", 400: "#5e8bff", 500: "#3b6bff",
+                600: "#2348c0", 700: "#1d3a99", 800: "#1a3180",
+                900: "#1a2c6a", 950: "#101a40",
+              }
+            }
+          }
+        }
+      };
+    </script>
+
+    <!-- Flowbite CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+
+    <!-- Dark mode prevent flicker -->
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        if (theme === 'dark') document.documentElement.classList.add('dark');
+      })();
+    </script>
+
+    <style>
+      * { font-family: 'Inter', sans-serif; }
+      .brand-gradient {
+        background: linear-gradient(135deg, #1a3180 0%, #1d3a99 40%, #101a40 100%);
+      }
+    </style>
+</head>
+
+<body class="h-full bg-white dark:bg-gray-900 transition-colors duration-300">
+    <div class="flex min-h-screen flex-col lg:flex-row">
+
+        <!-- ===== LEFT PANEL ===== -->
+        <div class="brand-gradient relative hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between p-10 text-white overflow-hidden">
+            <!-- Decorative circles -->
+            <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            <div class="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/3"></div>
+
+            <!-- Logo -->
+            <div class="relative z-10">
+                <a href="/" class="inline-flex items-center gap-3">
+                    <img src="/asset/img/logo_white.png" alt="wastescan" class="h-14 w-14">
+                    <span class="text-2xl font-bold tracking-tight">wastescan</span>
+                </a>
+            </div>
+
+            <!-- Features -->
+            <div class="relative z-10 space-y-8">
+                <div class="space-y-2">
+                    <h2 class="text-2xl font-semibold leading-snug">
+                        Sistem Monitoring<br>Smart Trash Bin
+                    </h2>
+                    <p class="text-base text-white/70 max-w-sm">
+                        Solusi cerdas untuk klasifikasi dan monitoring sampah medis & non-medis secara real-time.
+                    </p>
+                </div>
+
+                <div class="space-y-5">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i data-lucide="cpu" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold">Klasifikasi Otomatis</h3>
+                            <p class="text-xs text-white/60 mt-0.5">Deteksi sampah medis & non-medis menggunakan sensor dan model AI TFLite</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i data-lucide="radio" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold">Monitoring Real-Time</h3>
+                            <p class="text-xs text-white/60 mt-0.5">Pantau kapasitas, berat, dan status tempat sampah secara langsung dari dashboard</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold">Analitik Lengkap</h3>
+                            <p class="text-xs text-white/60 mt-0.5">Laporan statistik harian, mingguan, dan bulanan untuk pengambilan keputusan</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold">Notifikasi Cerdas</h3>
+                            <p class="text-xs text-white/60 mt-0.5">Peringatan otomatis saat kapasitas penuh atau terdeteksi sampah tidak sesuai kategori</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="relative z-10 text-xs text-white/40">
+                &copy; 2026 wastescan &mdash; Smart Trash Bin Monitoring System
+            </div>
+        </div>
+
+        <!-- ===== RIGHT PANEL ===== -->
+        <div class="flex flex-1 flex-col justify-center px-6 py-12 lg:px-12 xl:px-20">
+
+            <!-- Mobile logo -->
+            <div class="lg:hidden mb-10 text-center">
+                <img src="/asset/img/logo.png" alt="wastescan" class="h-16 w-16 mx-auto">
+                <h2 class="mt-3 text-xl font-bold text-gray-900 dark:text-white">wastescan</h2>
+            </div>
+
+            <div class="mx-auto w-full max-w-sm">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Masuk</h2>
+                    <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+                        Masukkan password untuk mengakses dashboard
+                    </p>
+                </div>
+
+                {% if error %}
+                <div class="flex items-center gap-2 p-3 mb-5 text-sm text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 rounded-lg border border-red-200 dark:border-red-800">
+                    <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0"></i>
+                    <span>{{ error }}</span>
+                </div>
+                {% endif %}
+
+                <form method="POST" action="/login" class="space-y-5">
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            Password
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+                                <i data-lucide="lock" class="w-4 h-4 text-gray-400 dark:text-gray-500"></i>
+                            </div>
+                            <input type="password" id="password" name="password" required
+                                class="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
+                                placeholder="Masukkan password">
+                            <button type="button" onclick="togglePassword()"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
+                                <i data-lucide="eye" id="eye-icon" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit"
+                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                        Masuk
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flowbite JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+    <script>
+        lucide.createIcons();
+
+        function togglePassword() {
+            const pwd = document.getElementById("password");
+            const icon = document.getElementById("eye-icon");
+            if (pwd.type === "password") {
+                pwd.type = "text";
+                icon.setAttribute("data-lucide", "eye-off");
+            } else {
+                pwd.type = "password";
+                icon.setAttribute("data-lucide", "eye");
+            }
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<!-- HISTORY PAGE - shadcn-style + compact filter + berat -->
+<div class="space-y-6">
+
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">History</h1>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 mt-1">Riwayat deteksi sampah & berat dari IoT client</p>
+        </div>
+        <div class="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">
+            <span class="font-medium text-zinc-900 dark:text-zinc-100">{{ pagination.total }}</span> total log
+        </div>
+    </div>
+
+    <!-- COMPACT FILTER (single row) -->
+    <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm">
+        <form method="GET" action="/history" class="p-3">
+            <div class="flex flex-wrap items-end gap-2">
+
+                <!-- SEARCH -->
+                <div class="flex-1 min-w-[160px]">
+                    <label for="q" class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-0.5">Cari</label>
+                    <div class="relative">
+                        <svg class="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.34-4.34m0 0A8 8 0 1 0 5.34 5.34a8 8 0 0 0 11.32 11.32Z"/>
+                        </svg>
+                        <input type="text" name="q" id="q" value="{{ filters.q }}"
+                            placeholder="Kategori..."
+                            class="w-full pl-7 pr-2 py-1.5 text-xs border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100">
+                    </div>
+                </div>
+
+                <!-- KATEGORI -->
+                <div>
+                    <label for="kategori" class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-0.5">Kategori</label>
+                    <select name="kategori" id="kategori"
+                        class="px-2 py-1.5 text-xs border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100">
+                        <option value="">Semua</option>
+                        <option value="Medical" {% if filters.kategori == 'Medical' %}selected{% endif %}>Medical</option>
+                        <option value="Non Medical" {% if filters.kategori == 'Non Medical' %}selected{% endif %}>Non Medical</option>
+                    </select>
+                </div>
+
+                <!-- TANGGAL -->
+                <div>
+                    <label for="tanggal" class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-0.5">Tanggal</label>
+                    <input type="date" name="tanggal" id="tanggal" value="{{ filters.tanggal }}"
+                        class="px-2 py-1.5 text-xs border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100">
+                </div>
+
+                <!-- DATE RANGE -->
+                <div>
+                    <label class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-0.5">Range</label>
+                    <div class="flex gap-1">
+                        <input type="date" name="start_date" value="{{ filters.start_date }}"
+                            class="w-[120px] px-2 py-1.5 text-xs border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+                            placeholder="Dari">
+                        <input type="date" name="end_date" value="{{ filters.end_date }}"
+                            class="w-[120px] px-2 py-1.5 text-xs border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+                            placeholder="Sampai">
+                    </div>
+                </div>
+
+                <!-- PER PAGE -->
+                <div>
+                    <label for="per_page" class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-0.5">/Hal</label>
+                    <select name="per_page" id="per_page"
+                        class="px-2 py-1.5 text-xs border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100">
+                        <option value="15" selected>15</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="flex items-center gap-1.5 ml-auto">
+                    <button type="submit"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-zinc-900 dark:bg-zinc-100 dark:bg-zinc-800 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 .8 1.6l-6.4 9.6V20l-4-2v-3.8L4.2 4.6A1 1 0 0 1 4 4Z"/></svg>
+                        Terapkan
+                    </button>
+                    <a href="/history"
+                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-700/50 dark:bg-zinc-800/50 transition">
+                        Reset
+                    </a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- TABLE -->
+    <div class="rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-700">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-xs">Gambar</th>
+                        <th class="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-xs">Kategori</th>
+                        <th class="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-xs">
+                            <div class="flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M6 6v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6m-9 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                                Deteksi Berat
+                            </div>
+                        </th>
+                        <th class="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-xs">Confidence</th>
+                        <th class="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-xs">Jam</th>
+                        <th class="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider text-xs">Tanggal</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                {% for log in logs %}
+                    {% set berat_row = berat_per_kategori.get(log.kategori, 0) %}
+                    <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 dark:bg-zinc-800/50 transition cursor-pointer"
+                        onclick="openTrashModal({{ log.id }})">
+
+                        <!-- IMAGE -->
+                        <td class="px-4 py-3">
+                            {% if log.image_path %}
+                            <div class="relative w-14 h-14 rounded-md overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 group">
+                                <img src="{{ url_for('static', filename=log.image_path) }}"
+                                    loading="lazy" decoding="async" alt="Trash"
+                                    class="w-full h-full object-cover transition group-hover:scale-105"
+                                    onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;flex items-center justify-center w-full h-full text-zinc-400 dark:text-zinc-500 text-[10px]&quot;>No img</div>'">
+                            </div>
+                            {% else %}
+                            <div class="w-14 h-14 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-400 dark:text-zinc-500 text-[10px]">N/A</div>
+                            {% endif %}
+                        </td>
+
+                        <!-- KATEGORI -->
+                        <td class="px-4 py-3">
+                            {% if log.kategori == "Medical" %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-zinc-900 dark:bg-zinc-100 dark:bg-zinc-800 text-white">
+                                Medical
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+                                Non Medical
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- DETEKSI BERAT (current bin weight for this kategori) -->
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-semibold text-zinc-900 dark:text-zinc-100 tabular-nums text-sm">{{ "%.1f"|format(berat_row) }}</span>
+                                <span class="text-[10px] text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 font-medium uppercase">g</span>
+                            </div>
+                        </td>
+
+                        <!-- CONFIDENCE -->
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium text-zinc-900 dark:text-zinc-100 tabular-nums text-sm">{{ "%.1f"|format(log.confidence) }}%</span>
+                                <div class="w-10 h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-zinc-900 dark:bg-zinc-100 dark:bg-zinc-800" style="width: {{ [log.confidence, 100] | min }}%;"></div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="px-4 py-3 text-zinc-600 dark:text-zinc-400 dark:text-zinc-500 tabular-nums text-xs">{{ format_wita(log.created_at, '%H:%M:%S WITA') }}</td>
+                        <td class="px-4 py-3 text-zinc-600 dark:text-zinc-400 dark:text-zinc-500 tabular-nums text-xs">{{ format_wita(log.created_at, '%d %b %Y') }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="px-4 py-12 text-center text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">
+                            <svg class="mx-auto w-12 h-12 text-zinc-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 0 1 5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                            <p class="font-medium">Tidak ada data</p>
+                            <p class="text-sm mt-1">Coba ubah filter atau reset pencarian</p>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        {% if pagination.pages > 1 %}
+        <div class="flex items-center justify-between border-t border-zinc-200 dark:border-zinc-700 px-6 py-3 bg-zinc-50 dark:bg-zinc-800/50">
+            <div class="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">
+                Hal <span class="font-medium text-zinc-900 dark:text-zinc-100">{{ pagination.page }}</span>/<span class="font-medium text-zinc-900 dark:text-zinc-100">{{ pagination.pages }}</span>
+                <span class="hidden sm:inline">
+                    &middot; {{ ((pagination.page - 1) * pagination.per_page) + 1 }}-{{ [pagination.page * pagination.per_page, pagination.total] | min }}/{{ pagination.total }}
+                </span>
+            </div>
+
+            <div class="flex items-center gap-1">
+                {% if pagination.has_prev %}
+                <a href="{{ url_for('history', page=pagination.prev_page, **filters) }}"
+                    class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-700/50 dark:bg-zinc-800/50 transition">
+                    <svg class="w-3.5 h-3.5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/></svg>
+                    Prev
+                </a>
+                {% else %}
+                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-zinc-400 dark:text-zinc-500 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md cursor-not-allowed">
+                    <svg class="w-3.5 h-3.5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/></svg>
+                    Prev
+                </span>
+                {% endif %}
+
+                {% set start_page = [pagination.page - 2, 1] | max %}
+                {% set end_page = [pagination.page + 2, pagination.pages] | min %}
+                {% if start_page > 1 %}
+                <a href="{{ url_for('history', page=1, **filters) }}"
+                    class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-700/50 dark:bg-zinc-800/50 transition">1</a>
+                {% if start_page > 2 %}<span class="px-1 text-zinc-400 dark:text-zinc-500 text-xs">…</span>{% endif %}
+                {% endif %}
+                {% for p in range(start_page, end_page + 1) %}
+                {% if p == pagination.page %}
+                <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold text-white bg-zinc-900 dark:bg-zinc-100 dark:bg-zinc-800 border border-zinc-900 rounded-md">{{ p }}</span>
+                {% else %}
+                <a href="{{ url_for('history', page=p, **filters) }}"
+                    class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-700/50 dark:bg-zinc-800/50 transition">{{ p }}</a>
+                {% endif %}
+                {% endfor %}
+                {% if end_page < pagination.pages %}
+                {% if end_page < pagination.pages - 1 %}<span class="px-1 text-zinc-400 dark:text-zinc-500 text-xs">…</span>{% endif %}
+                <a href="{{ url_for('history', page=pagination.pages, **filters) }}"
+                    class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-700/50 dark:bg-zinc-800/50 transition">{{ pagination.pages }}</a>
+                {% endif %}
+
+                {% if pagination.has_next %}
+                <a href="{{ url_for('history', page=pagination.next_page, **filters) }}"
+                    class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-700/50 dark:bg-zinc-800/50 transition">
+                    Next
+                    <svg class="w-3.5 h-3.5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/></svg>
+                </a>
+                {% else %}
+                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-zinc-400 dark:text-zinc-500 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md cursor-not-allowed">
+                    Next
+                    <svg class="w-3.5 h-3.5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/></svg>
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,275 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Perangkat{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- HEADER -->
+    <div class="flex items-start justify-between flex-wrap gap-3">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800 dark:text-slate-100 transition-colors">Perangkat</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Kelola status sensor & pemantau perangkat IoT</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+            <span class="inline-flex w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>{{ devices|length }} perangkat terdaftar</span>
+        </div>
+    </div>
+
+    <!-- DEVICE CARDS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+    {% for device in devices %}
+        {% set variant = device.variant if device.variant else (loop.index % 3) %}
+        <div class="device-card group rounded-xl border overflow-hidden transition-all duration-300
+            {% if device.status == 'ON' %}
+                bg-white dark:bg-slate-800 border-emerald-200 dark:border-emerald-800/50
+            {% elif device.status == 'OFF' %}
+                bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700
+            {% else %}
+                bg-white dark:bg-slate-800 border-red-200 dark:border-red-800/50
+            {% endif %} transition-colors"
+            data-device-id="{{ device.id }}"
+            data-status="{{ device.status }}"
+            data-variant="{{ variant }}">
+
+            <!-- DEVICE HEADER -->
+            <div class="px-5 pt-4 pb-3 flex items-start justify-between">
+                <div class="min-w-0">
+                    <h3 class="text-base font-semibold text-slate-800 dark:text-slate-100 truncate transition-colors">{{ device.nama_perangkat }}</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        Last update: <span class="device-last-updated">{{ device.created_at.strftime('%d %b %H:%M') if device.created_at else '-' }}</span>
+                    </p>
+                </div>
+
+                <!-- STATUS BADGE -->
+                <span class="device-badge inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-semibold
+                    {% if device.status == 'ON' %}
+                        bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300
+                    {% elif device.status == 'OFF' %}
+                        bg-slate-100 text-slate-600 dark:bg-slate-700/50 dark:text-slate-300
+                    {% else %}
+                        bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300
+                    {% endif %}">
+                    <span class="w-1.5 h-1.5 rounded-full
+                        {% if device.status == 'ON' %}bg-emerald-500
+                        {% elif device.status == 'OFF' %}bg-slate-400
+                        {% else %}bg-red-500{% endif %}"></span>
+                    {{ device.status }}
+                </span>
+            </div>
+
+            <!-- SENSOR VISUAL -->
+            <div class="device-sensor px-5 py-5 bg-gradient-to-br
+                {% if device.status == 'ON' %}
+                    from-brand-50 to-emerald-50 dark:from-brand-900/20 dark:to-emerald-900/10
+                {% elif device.status == 'OFF' %}
+                    from-slate-50 to-slate-100 dark:from-slate-700/30 dark:to-slate-800/30
+                {% else %}
+                    from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/10
+                {% endif %}">
+
+                {% if "raspberry" in device.nama_perangkat.lower() or "rasbery" in device.nama_perangkat.lower() %}
+                    <!-- ========== CUSTOM VARIANT: RASPBERRY PI IMAGE ========== -->
+                    <div class="h-48 flex items-center justify-center overflow-hidden rounded-lg bg-white/50 dark:bg-slate-900/30 p-2 border border-slate-100 dark:border-slate-800">
+                        <img src="/asset/img/raspberry.jpg" alt="Raspberry Pi" class="h-full object-contain hover:scale-105 transition-transform duration-300">
+                    </div>
+                {% elif "kamera" in device.nama_perangkat.lower() or "camera" in device.nama_perangkat.lower() %}
+                    <!-- ========== CUSTOM VARIANT: CAMERA SENSOR ========== -->
+                    <div class="h-48 flex items-center justify-center overflow-hidden rounded-lg bg-white/50 dark:bg-slate-900/30 p-2 border border-slate-100 dark:border-slate-800">
+                        <img src="/asset/img/rasberry pi  camera model 3.png" alt="Camera Sensor" class="h-full object-contain hover:scale-105 transition-transform duration-300">
+                    </div>
+                {% elif "load cell" in device.nama_perangkat.lower() or "loadcell" in device.nama_perangkat.lower() %}
+                    <!-- ========== CUSTOM VARIANT: LOAD CELL SENSOR ========== -->
+                    <div class="h-48 flex items-center justify-center overflow-hidden rounded-lg bg-white/50 dark:bg-slate-900/30 p-2 border border-slate-100 dark:border-slate-800">
+                        <img src="/asset/img/Load Cell .png" alt="Load Cell Sensor" class="h-full object-contain hover:scale-105 transition-transform duration-300">
+                    </div>
+                {% elif "ultrasonik" in device.nama_perangkat.lower() or "ultrasonic" in device.nama_perangkat.lower() %}
+                    <!-- ========== CUSTOM VARIANT: ULTRASONIC SENSOR ========== -->
+                    <div class="h-48 flex items-center justify-center overflow-hidden rounded-lg bg-white/50 dark:bg-slate-900/30 p-2 border border-slate-100 dark:border-slate-800">
+                        <img src="/asset/img/Sensor Ultrasonik .png" alt="Ultrasonic Sensor" class="h-full object-contain hover:scale-105 transition-transform duration-300">
+                    </div>
+                {% elif variant == 1 %}
+                    <!-- ========== VARIANT 1: MEDICAL BIN with red cross ========== -->
+                    <svg viewBox="0 0 240 240" class="w-full h-48" data-status="{{ device.status }}">
+                        <defs>
+                            <linearGradient id="medBin-{{ device.id }}" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#dc2626"/>
+                                <stop offset="100%" stop-color="#991b1b"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Floor shadow -->
+                        <ellipse cx="120" cy="220" rx="70" ry="6" fill="#1f2937" opacity="0.15"/>
+                        <!-- Lid -->
+                        <rect x="50" y="40" width="140" height="22" rx="6" fill="#7f1d1d"/>
+                        <!-- Handle/hinge -->
+                        <rect x="105" y="22" width="30" height="20" rx="3" fill="#7f1d1d"/>
+                        <!-- Bin body -->
+                        <rect x="58" y="58" width="124" height="158" rx="8" fill="url(#medBin-{{ device.id }})"/>
+                        <!-- Stripes -->
+                        <rect x="58" y="100" width="124" height="3" fill="#ffffff" opacity="0.15"/>
+                        <rect x="58" y="140" width="124" height="3" fill="#ffffff" opacity="0.15"/>
+                        <!-- Medical cross -->
+                        <rect x="105" y="80" width="30" height="60" fill="#ffffff" rx="2"/>
+                        <rect x="88" y="100" width="64" height="22" fill="#ffffff" rx="2"/>
+                        <!-- Sensor LED -->
+                        <circle cx="120" cy="48" r="6" fill="#0f172a" stroke="#10b981" stroke-width="2" class="{% if device.status == 'ON' %}sensor-led-on{% endif %}"/>
+                        <circle cx="120" cy="48" r="3" fill="{% if device.status == 'ON' %}#10b981{% else %}#475569{% endif %}"/>
+                        <!-- Ultrasonic waves -->
+                        {% if device.status == 'ON' %}
+                        <g class="sensor-waves">
+                            <path d="M 140 48 Q 148 48 148 52 Q 148 56 140 56" stroke="#10b981" stroke-width="2" fill="none" opacity="0.7"/>
+                            <path d="M 100 48 Q 92 48 92 52 Q 92 56 100 56" stroke="#10b981" stroke-width="2" fill="none" opacity="0.7"/>
+                            <path d="M 150 48 Q 162 48 162 54 Q 162 60 150 60" stroke="#10b981" stroke-width="1.5" fill="none" opacity="0.4"/>
+                            <path d="M 90 48 Q 78 48 78 54 Q 78 60 90 60" stroke="#10b981" stroke-width="1.5" fill="none" opacity="0.4"/>
+                        </g>
+                        {% endif %}
+                    </svg>
+
+                {% elif variant == 2 %}
+                    <!-- ========== VARIANT 2: RECYCLING / CARDBOARD BIN ========== -->
+                    <svg viewBox="0 0 240 240" class="w-full h-48" data-status="{{ device.status }}">
+                        <defs>
+                            <linearGradient id="recBin-{{ device.id }}" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#3b6bff"/>
+                                <stop offset="100%" stop-color="#2348c0"/>
+                            </linearGradient>
+                        </defs>
+                        <ellipse cx="120" cy="220" rx="65" ry="6" fill="#1f2937" opacity="0.15"/>
+                        <!-- Recycling symbol on side -->
+                        <rect x="55" y="60" width="130" height="155" rx="10" fill="url(#recBin-{{ device.id }})"/>
+                        <!-- Recycling triangles (white) -->
+                        <g opacity="0.95">
+                            <path d="M 120 95 L 137 105 L 130 122 Z" fill="#ffffff"/>
+                            <path d="M 120 95 L 103 105 L 110 122 Z" fill="#ffffff" opacity="0.85"/>
+                            <path d="M 137 105 L 145 122 L 127 122 Z" fill="#ffffff" opacity="0.85"/>
+                            <path d="M 103 105 L 95 122 L 113 122 Z" fill="#ffffff" opacity="0.85"/>
+                            <path d="M 130 122 L 137 142 L 113 142 Z" fill="#ffffff" opacity="0.95"/>
+                            <path d="M 127 122 L 137 142 L 121 132 Z" fill="#ffffff" opacity="0.7"/>
+                            <path d="M 113 122 L 103 142 L 119 132 Z" fill="#ffffff" opacity="0.7"/>
+                        </g>
+                        <!-- Vertical ribs -->
+                        <rect x="78" y="155" width="3" height="50" fill="#ffffff" opacity="0.3"/>
+                        <rect x="118" y="155" width="3" height="50" fill="#ffffff" opacity="0.3"/>
+                        <rect x="158" y="155" width="3" height="50" fill="#ffffff" opacity="0.3"/>
+                        <!-- Lid -->
+                        <rect x="48" y="40" width="144" height="22" rx="6" fill="#1a3180"/>
+                        <!-- Sensor LED on top -->
+                        <circle cx="120" cy="48" r="6" fill="#0f172a" stroke="#10b981" stroke-width="2" class="{% if device.status == 'ON' %}sensor-led-on{% endif %}"/>
+                        <circle cx="120" cy="48" r="3" fill="{% if device.status == 'ON' %}#10b981{% else %}#475569{% endif %}"/>
+                        {% if device.status == 'ON' %}
+                        <g class="sensor-waves">
+                            <path d="M 105 50 Q 100 50 100 55 Q 100 60 105 60" stroke="#10b981" stroke-width="2" fill="none" opacity="0.6"/>
+                            <path d="M 135 50 Q 140 50 140 55 Q 140 60 135 60" stroke="#10b981" stroke-width="2" fill="none" opacity="0.6"/>
+                        </g>
+                        {% endif %}
+                    </svg>
+
+                {% else %}
+                    <!-- ========== VARIANT 3: COMPACT ROUND SENSOR ========== -->
+                    <svg viewBox="0 0 240 240" class="w-full h-48" data-status="{{ device.status }}">
+                        <defs>
+                            <linearGradient id="cBin-{{ device.id }}" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#94a3b8"/>
+                                <stop offset="100%" stop-color="#475569"/>
+                            </linearGradient>
+                            <radialGradient id="cLid-{{ device.id }}">
+                                <stop offset="0%" stop-color="#cbd5e1"/>
+                                <stop offset="100%" stop-color="#64748b"/>
+                            </radialGradient>
+                        </defs>
+                        <ellipse cx="120" cy="220" rx="55" ry="5" fill="#1f2937" opacity="0.15"/>
+                        <!-- Round bin body -->
+                        <ellipse cx="120" cy="125" rx="55" ry="85" fill="url(#cBin-{{ device.id }})"/>
+                        <!-- Vertical seam -->
+                        <line x1="120" y1="50" x2="120" y2="200" stroke="#1f2937" stroke-width="1" opacity="0.3"/>
+                        <!-- Bin top rim -->
+                        <ellipse cx="120" cy="50" rx="58" ry="14" fill="url(#cLid-{{ device.id }})"/>
+                        <!-- Inner shadow -->
+                        <ellipse cx="120" cy="50" rx="40" ry="9" fill="#1f2937" opacity="0.4"/>
+                        <!-- Sensor LED -->
+                        <circle cx="120" cy="42" r="7" fill="#0f172a" stroke="#10b981" stroke-width="2.5" class="{% if device.status == 'ON' %}sensor-led-on{% endif %}"/>
+                        <circle cx="120" cy="42" r="3.5" fill="{% if device.status == 'ON' %}#10b981{% else %}#475569{% endif %}"/>
+                        <!-- Distance rings around bin (when ON) -->
+                        {% if device.status == 'ON' %}
+                        <ellipse cx="120" cy="125" rx="75" ry="105" fill="none" stroke="#10b981" stroke-width="1" opacity="0.3" class="sensor-ring-pulse"/>
+                        <ellipse cx="120" cy="125" rx="88" ry="118" fill="none" stroke="#10b981" stroke-width="1" opacity="0.2" class="sensor-ring-pulse-2"/>
+                        {% endif %}
+                        <!-- Display screen -->
+                        <rect x="90" y="100" width="60" height="40" rx="4" fill="#0f172a"/>
+                        <text x="120" y="125" text-anchor="middle" fill="{% if device.status == 'ON' %}#10b981{% else %}#475569{% endif %}" font-size="20" font-weight="bold" font-family="monospace">--</text>
+                        {% if device.status == 'ON' %}
+                        <text x="120" y="170" text-anchor="middle" fill="#ffffff" font-size="11" opacity="0.7" font-family="sans-serif">SCAN ACTIVE</text>
+                        {% else %}
+                        <text x="120" y="170" text-anchor="middle" fill="#ffffff" font-size="11" opacity="0.4" font-family="sans-serif">OFFLINE</text>
+                        {% endif %}
+                    </svg>
+                {% endif %}
+
+            </div>
+
+            <!-- DEVICE FOOTER - TOGGLE ONLY (no jarak/berat text) -->
+            <div class="px-5 py-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-colors">
+                <form action="{{ url_for('toggle_device', device_id=device.id) }}" method="POST">
+                    <button type="submit"
+                        class="device-toggle-btn w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-md text-xs font-semibold transition-colors
+                        {% if device.status == 'ON' %}
+                            bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800/50 dark:hover:bg-red-900/40
+                        {% else %}
+                            bg-brand-600 text-white hover:bg-brand-700 border border-brand-700
+                        {% endif %}">
+                        {% if device.status == 'ON' %}
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 1 1 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                            Matikan Sensor
+                        {% else %}
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            {% if device.status == 'OFF' %}Nyalakan Sensor{% else %}Reset Sensor{% endif %}
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+
+    <!-- ERROR DEVICES ALERT -->
+    {% if error_devices %}
+    <div class="rounded-xl border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20 p-5 transition-colors">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 0 0 1.84-2.75L13.74 4a2 2 0 0 0-3.48 0L3.16 16.25A2 2 0 0 0 5 19Z"/></svg>
+            </div>
+            <div class="flex-1">
+                <h2 class="text-base font-semibold text-red-700 dark:text-red-300">{{ error_devices|length }} Sensor Error Terdeteksi</h2>
+                <ul class="mt-2 space-y-1">
+                    {% for device in error_devices %}
+                    <li class="text-sm text-red-600 dark:text-red-400">• {{ device.nama_perangkat }} tidak dapat terdeteksi</li>
+                    {% endfor %}
+                </ul>
+                <p class="text-xs text-red-500 mt-2">Reset sensor untuk menyambungkan ulang</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+    .sensor-led-on { animation: ledPulse 2s ease-in-out infinite; transform-origin: center; }
+    @keyframes ledPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.92); } }
+
+    .sensor-waves { animation: waveExpand 1.4s ease-out infinite; transform-origin: center; }
+    @keyframes waveExpand { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+
+    .sensor-ring-pulse { animation: ringExpand 2s ease-out infinite; transform-origin: 120px 125px; }
+    .sensor-ring-pulse-2 { animation: ringExpand 2s ease-out infinite 0.7s; transform-origin: 120px 125px; }
+    @keyframes ringExpand { 0% { opacity: 0.6; transform: scale(0.85); } 100% { opacity: 0; transform: scale(1.15); } }
+
+    .device-card { transition: all 0.3s ease; }
+    .device-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(35,72,192,0.15); }
+    html.dark .device-card:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+</style>
+
+{% endblock %}
