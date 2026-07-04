@@ -546,8 +546,8 @@ def thread_ultrasonic():
 
     def cek_kapasitas(jarak):
         if jarak is None: return "Error"
-        if jarak <= 30: return "Penuh"
-        if jarak <= 50: return "Hampir Penuh"
+        if jarak <= 10: return "Penuh"
+        if jarak <= 22: return "Hampir Penuh"
         return "Kosong"
 
     while not shutdown_event.is_set():
@@ -602,8 +602,9 @@ def format_berat(gram: float) -> str:
 def thread_timbangan():
     global nol_medis, noise_medis, nol_nonmedis, noise_nonmedis
 
-    dz_medis    = max(0.5, (noise_medis    / MEDIS_FAKTOR)    * 2.0)
-    dz_nonmedis = max(0.5, (noise_nonmedis / NONMEDIS_FAKTOR) * 2.0)
+    # Batasi dead-zone maksimal 2.5 gram agar tetap sangat sensitif terhadap barang ringan
+    dz_medis    = min(2.5, max(0.5, (noise_medis    / MEDIS_FAKTOR)    * 2.0))
+    dz_nonmedis = min(2.5, max(0.5, (noise_nonmedis / NONMEDIS_FAKTOR) * 2.0))
 
     hist_medis: List[float] = []
     hist_nonmedis: List[float] = []
@@ -633,7 +634,7 @@ def thread_timbangan():
                     berat_m_prev = berat_m
 
                     hist_medis.append(berat_m)
-                    if len(hist_medis) > WINDOW_TAMPIL:
+                    if len(hist_medis) > 2: # Kurangi smoothing lag
                         hist_medis.pop(0)
 
                     tampil_m = max(0.0, round(statistics.mean(hist_medis), 1))
@@ -651,7 +652,7 @@ def thread_timbangan():
                     berat_n_prev = berat_n
 
                     hist_nonmedis.append(berat_n)
-                    if len(hist_nonmedis) > WINDOW_TAMPIL:
+                    if len(hist_nonmedis) > 2: # Kurangi smoothing lag
                         hist_nonmedis.pop(0)
 
                     tampil_n = max(0.0, round(statistics.mean(hist_nonmedis), 1))
@@ -675,7 +676,9 @@ def thread_timbangan():
 
         except Exception as e:
             log_error(f"[TIMBANGAN] Loop error: {e}")
-        time.sleep(1.5)
+        
+        # Dipercepat dari 1.5 detik menjadi 0.5 detik agar respon di web lebih gesit!
+        time.sleep(0.5)
 
 # =====================================================================
 # ⑤ THREAD DEVICE CONTROL (GET DARI WEBSITE SECARA BERKALA)
