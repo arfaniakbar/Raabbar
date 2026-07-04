@@ -73,9 +73,9 @@ def kirim_api_async(url: str, payload: dict, files: dict = None):
     def run():
         try:
             if files:
-                response = requests.post(url, data=payload, files=files, timeout=3.0)
+                response = requests.post(url, data=payload, files=files, timeout=15.0)
             else:
-                response = requests.post(url, json=payload, timeout=2.0)
+                response = requests.post(url, json=payload, timeout=10.0)
 
             if response.status_code not in [200, 201]:
                 print(f"[API-WARN] Gagal mengirim ke {url}. Respon: {response.status_code}")
@@ -682,7 +682,7 @@ def thread_device_control_poller():
     print("[SYSTEM] Thread Poller ON/OFF Kontrol Device Aktif.")
     while not shutdown_event.is_set():
         try:
-            response = requests.get(API_DEVICE_CONTROL, timeout=2.0)
+            response = requests.get(API_DEVICE_CONTROL, timeout=10.0)
             if response.status_code == 200:
                 data = response.json()
                 
