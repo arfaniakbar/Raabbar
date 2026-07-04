@@ -74,7 +74,7 @@ db.init_app(app)
 # SOCKET
 # ==================================================
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # ==========================================
 # CREATE TABLES + SEED ADMIN
