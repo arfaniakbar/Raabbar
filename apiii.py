@@ -22,7 +22,7 @@ import requests  # Ditambahkan untuk komunikasi ke Website Flask
 # =====================================================================
 # CONFIG SERVER & API URL
 # =====================================================================
-URL_WEBSITE_BASE = "http://72.62.124.168:8003"
+URL_WEBSITE_BASE = "https://wastescan.site"
 API_TRASH = URL_WEBSITE_BASE + "/api/trash"
 API_WEIGHT = URL_WEBSITE_BASE + "/api/weight"
 API_CAPACITY = URL_WEBSITE_BASE + "/api/capacity"
