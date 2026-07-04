@@ -734,12 +734,12 @@ def thread_device_control_poller():
                             print("[POLLER] MEMATIKAN Sensor Load Cell Non-Medis.")
                             
                     elif nama_perangkat == "Sensor Raspberry Pi":
-                        if not status_on:
-                            print("[POLLER] Website memerintahkan SHUTDOWN OS SECARA UTUH!")
-                            # Hentikan program Python
-                            shutdown_event.set()
-                            # Beri perintah ke OS Linux Raspberry Pi untuk mati total
-                            os.system("sudo shutdown now")
+                        if status_on and not raspberry_enabled.is_set():
+                            raspberry_enabled.set()
+                            print("[POLLER] MENGHIDUPKAN Sensor Raspberry Pi.")
+                        elif not status_on and raspberry_enabled.is_set():
+                            raspberry_enabled.clear()
+                            print("[POLLER] Website memerintahkan Raspberry Pi STANDBY (Jeda).")
                             
         except Exception as e:
             print(f"[POLLER-ERROR] Gagal membaca status kontrol dari Website: {e}")
