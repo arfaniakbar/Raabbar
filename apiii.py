@@ -544,6 +544,17 @@ def thread_ultrasonic():
 
         return round(((pancaran_selesai - pancaran_mulai) * 34300) / 2, 1)
 
+    def ambil_jarak_stabil(pin_trig, pin_echo):
+        sampel = []
+        for _ in range(5): # Ambil 5 sampel cepat
+            j = ambil_jarak(pin_trig, pin_echo)
+            if j is not None and j > 0 and j < 400: # Batas logis HC-SR04
+                sampel.append(j)
+            time.sleep(0.05)
+        if not sampel:
+            return None
+        return round(statistics.median(sampel), 1)
+
     def cek_kapasitas(jarak):
         if jarak is None: return "Error"
         if jarak <= 30: return "Penuh"
@@ -563,11 +574,11 @@ def thread_ultrasonic():
 
             # Cek status on/off masing-masing ultrasonik
             if ultrasonik_medis_enabled.is_set():
-                j_medis = ambil_jarak(TRIG_MEDIS, ECHO_MEDIS)
+                j_medis = ambil_jarak_stabil(TRIG_MEDIS, ECHO_MEDIS)
                 stat_medis = cek_kapasitas(j_medis)
 
             if ultrasonik_non_medis_enabled.is_set():
-                j_non_medis = ambil_jarak(TRIG_NON_MEDIS, ECHO_NON_MEDIS)
+                j_non_medis = ambil_jarak_stabil(TRIG_NON_MEDIS, ECHO_NON_MEDIS)
                 stat_non_medis = cek_kapasitas(j_non_medis)
 
             update_state("capacity", {
