@@ -1,3 +1,9 @@
+try:
+    import gevent.monkey
+    gevent.monkey.patch_all()
+except ImportError:
+    pass
+
 from flask import Flask, render_template, request, session
 from models.bin_status import BinStatus
 
@@ -5,6 +11,10 @@ import os
 import json
 from flask_socketio import SocketIO
 import uuid
+from threading import Lock, RLock
+
+# Global lock untuk mencegah tabrakan SQLite di gevent
+db_lock = RLock()
 
 from flask import jsonify
 from werkzeug.utils import secure_filename
@@ -49,6 +59,11 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "raabbar-secret-key-change-m
 app.jinja_env.globals['format_wita'] = format_wita
 app.jinja_env.globals['now_wita'] = lambda: datetime.now(WITA)
 
+# Global lock (db_lock) sudah dipakai secara spesifik di tiap route (with db_lock:) 
+# jadi kita TIDAK PERLU me-lock seluruh request di before_request. 
+# Jika seluruh request di-lock, Socket.IO long-polling akan menahan lock selama 60 detik
+# dan membuat semua request API dari Raspberry Pi menjadi Time Out!
+
 
 app.config.from_object(Config)
 
@@ -74,21 +89,11 @@ db.init_app(app)
 # SOCKET
 # ==================================================
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
 # ==========================================
-# CREATE TABLES + SEED ADMIN
+# SEED ADMIN (SUDAH DIHAPUS AGAR TIDAK DEADLOCK)
 # ==========================================
-with app.app_context():
-    db.create_all()
-    if not User.query.filter_by(username="admin").first():
-        admin = User(username="admin")
-        admin.set_password("admin123")
-        db.session.add(admin)
-        db.session.commit()
-        print("[AUTH] Admin user seeded: admin / admin123")
-    else:
-        print("[AUTH] Admin user exists")
 
 # ==========================================
 # DATA: Daftar device IoT
@@ -130,9 +135,8 @@ devices = [
 ]
 
 # ==================================================
-# CREATE TABLE
+# CREATE TABLE & SEEDING (SUDAH DIHAPUS AGAR TIDAK DEADLOCK)
 # ==================================================
-
 from models.sampah import Sampah
 from models.berat_sampah import BeratSampah
 from models.pengambilan import PengambilanSampah
@@ -141,27 +145,7 @@ from models.trash_log import TrashLog
 from models.device_log import DeviceLog
 from models.history_log import HistoryLog
 
-with app.app_context():
-    print(db.metadata.tables.keys())
-    db.create_all()
-
-with app.app_context():
-    if BinStatus.query.first() is None:
-        db.session.add(
-            BinStatus(id=1)
-        )
-        db.session.commit()
-
-    if DeviceLog.query.first() is None:
-        for d in devices:
-            db.session.add(
-                DeviceLog(
-                    id=d["id"],
-                    nama_perangkat=d["name"],
-                    status=d["status"]
-                )
-            )
-        db.session.commit()
+# Database sudah dibuat, jadi kita tidak perlu mengeksekusinya lagi di setiap worker gunicorn.
 
 # ==================================================
 # DASHBOARD
@@ -172,16 +156,12 @@ def login():
     error = None
     if request.method == 'POST':
         password = request.form.get('password', '')
-        user = None
-        for u in User.query.all():
-            if u.check_password(password):
-                user = u
-                if u.username == 'admin':
-                    break
-        if user:
+        user = User.query.first()
+        if user and user.check_password(password):
             from datetime import datetime, timezone
             user.last_login = datetime.now(timezone.utc)
-            db.session.commit()
+            with db_lock:
+                db.session.commit()
             token = generate_token(user.id, user.username)
             session["username"] = user.username
             session["avatar_url"] = user.avatar_url
@@ -210,7 +190,8 @@ def api_update_username():
     if not new_username or len(new_username) < 2:
         return jsonify({"success": False, "error": "Username minimal 2 karakter"}), 400
     user.username = new_username
-    db.session.commit()
+    with db_lock:
+        db.session.commit()
     return jsonify({"success": True, "username": new_username})
 
 
@@ -226,7 +207,8 @@ def api_update_password():
     if len(new_pw) < 4:
         return jsonify({"success": False, "error": "Password minimal 4 karakter"}), 400
     user.set_password(new_pw)
-    db.session.commit()
+    with db_lock:
+        db.session.commit()
     return jsonify({"success": True})
 
 
@@ -262,7 +244,8 @@ def upload_avatar():
     file.save(os.path.join(upload_dir, filename))
     avatar_url = f"/static/uploads/avatars/{filename}"
     user.avatar_url = avatar_url
-    db.session.commit()
+    with db_lock:
+        db.session.commit()
     session["avatar_url"] = avatar_url
     return jsonify({"success": True, "avatar_url": avatar_url})
 
@@ -287,7 +270,8 @@ def api_login():
         return jsonify({'success': False, 'error': 'Password salah'}), 401
     from datetime import datetime, timezone
     user.last_login = datetime.now(timezone.utc)
-    db.session.commit()
+    with db_lock:
+        db.session.commit()
     token = generate_token(user.id, user.username)
     return jsonify({'success': True, 'token': token, 'user': user.to_dict()})
 
@@ -350,10 +334,12 @@ def dashboard():
         next_month = 1
         next_year += 1
 
+    start_of_date = datetime.combine(selected_date, datetime.min.time())
+    next_day = start_of_date + timedelta(days=1)
+
     logs = TrashLog.query.filter(
-        db.func.date(
-            TrashLog.created_at
-        ) == selected_date
+        TrashLog.created_at >= start_of_date,
+        TrashLog.created_at < next_day
     ).order_by(
         TrashLog.created_at.desc()
     ).all()
@@ -385,10 +371,17 @@ def dashboard():
     # CHART DATA
     # ==========================================
 
+    first_day = datetime(selected_year, selected_month, 1)
+    last_day_num = calendar.monthrange(selected_year, selected_month)[1]
+    last_day = datetime(selected_year, selected_month, last_day_num, 23, 59, 59)
+
     chart_result = db.session.query(
         db.func.date(TrashLog.created_at),
         TrashLog.kategori,
         db.func.count(TrashLog.id)
+    ).filter(
+        TrashLog.created_at >= first_day,
+        TrashLog.created_at <= last_day
     ).group_by(
         db.func.date(TrashLog.created_at),
         TrashLog.kategori
@@ -421,18 +414,21 @@ def dashboard():
     medical_hourly = [0] * 24
     non_medical_hourly = [0] * 24
 
-    # Ambil semua data hari ini (1 query untuk performa lebih baik dan kompatibilitas SQLite)
-    logs_today = TrashLog.query.filter(
-        db.func.date(TrashLog.created_at) == selected_date
-    ).all()
+    # Gunakan data logs yang sudah diambil di atas (performa jauh lebih cepat)
+    logs_today = logs
 
     for log in logs_today:
         if not log.created_at:
             continue
-        # Dapatkan jam dari waktu lokal/WITA jika perlu, 
-        # namun jika created_at default utcnow, kita mungkin butuh konversi.
-        # Untuk kesederhanaan, ambil langsung dari jamnya.
-        jam = log.created_at.hour
+        
+        # Konversi created_at (UTC) ke WITA sebelum mengambil jamnya
+        dt = log.created_at
+        if dt.tzinfo is None:
+            dt = pytz.utc.localize(dt).astimezone(WITA)
+        else:
+            dt = dt.astimezone(WITA)
+            
+        jam = dt.hour
         if log.kategori == 'Medical':
             medical_hourly[jam] += 1
         elif log.kategori == 'Non Medical':
@@ -443,12 +439,13 @@ def dashboard():
     # ==========================================
     bin_status = BinStatus.query.get(1)
     if not bin_status:
-        bin_status = BinStatus(id=1)
-        db.session.add(bin_status)
-        db.session.commit()
+        with db_lock:
+            bin_status = BinStatus(id=1)
+            db.session.add(bin_status)
+            db.session.commit()
 
-    BIN_EMPTY_CM = 30.0
-    BIN_FULL_CM = 5.0
+    BIN_EMPTY_CM = 60.0
+    BIN_FULL_CM = 30.0
 
     def fill_pct(jarak_cm):
         if jarak_cm is None or jarak_cm <= 0:
@@ -512,7 +509,10 @@ def analytics():
     end_date_str = request.args.get("end_date", "").strip()
     analytics_filters = {"start_date": start_date_str, "end_date": end_date_str}
 
-    # Parse date range — default: last 7 days
+    btn = request.args.get("btn", "")
+    is_all_time = btn == "semua" or (not btn and not start_date_str and not end_date_str)
+
+    # Parse date range
     if start_date_str and end_date_str:
         try:
             start_dt = datetime.strptime(start_date_str, "%Y-%m-%d").replace(tzinfo=timezone)
@@ -521,17 +521,25 @@ def analytics():
             start_dt = today - timedelta(days=6)
             start_dt = start_dt.replace(hour=0, minute=0, second=0)
             end_dt = today
+    elif is_all_time:
+        # Chart display limits to last 30 days so it doesn't freeze the browser
+        start_dt = today - timedelta(days=30)
+        start_dt = start_dt.replace(hour=0, minute=0, second=0)
+        end_dt = today
     else:
-        # Default: last 7 days including today
+        # Default: last 7 days including today (for other buttons if any)
         start_dt = today - timedelta(days=6)
         start_dt = start_dt.replace(hour=0, minute=0, second=0)
         end_dt = today
 
-    # Base query with date filter
-    base_query = TrashLog.query.filter(
-        TrashLog.created_at >= start_dt,
-        TrashLog.created_at <= end_dt
-    )
+    # Base query for Totals (cards)
+    if is_all_time:
+        base_query = TrashLog.query
+    else:
+        base_query = TrashLog.query.filter(
+            TrashLog.created_at >= start_dt,
+            TrashLog.created_at <= end_dt
+        )
 
     # Total filtered
     total_filtered = base_query.count()
@@ -546,10 +554,14 @@ def analytics():
     ).count()
 
     # Avg confidence (filtered)
-    avg_row = db.session.query(db.func.avg(TrashLog.confidence)).filter(
-        TrashLog.created_at >= start_dt,
-        TrashLog.created_at <= end_dt
-    ).scalar()
+    if is_all_time:
+        avg_row = db.session.query(db.func.avg(TrashLog.confidence)).scalar()
+    else:
+        avg_row = db.session.query(db.func.avg(TrashLog.confidence)).filter(
+            TrashLog.created_at >= start_dt,
+            TrashLog.created_at <= end_dt
+        ).scalar()
+        
     avg_confidence = float(avg_row) if avg_row else 0.0
 
     # ==========================
@@ -628,7 +640,20 @@ def analytics():
 @login_required
 def devices_page():
 
-    devices = DeviceLog.query.all()
+    with db_lock:
+        devices_db = DeviceLog.query.all()
+    pi_off = any(d.nama_perangkat == "Sensor Raspberry Pi" and d.status == "OFF" for d in devices_db)
+
+    class DeviceWrapper:
+        def __init__(self, d):
+            self.id = d.id
+            self.nama_perangkat = d.nama_perangkat
+            self.status = "OFF" if (pi_off and d.nama_perangkat != "Sensor Raspberry Pi") else d.status
+            self.created_at = d.created_at
+            self.pesan = getattr(d, 'pesan', '')
+            self.variant = getattr(d, 'variant', None)
+            
+    devices = [DeviceWrapper(d) for d in devices_db]
 
     error_devices = [
         d for d in devices
@@ -649,15 +674,16 @@ def update_device():
         if not data or "device" not in data:
             return jsonify(success=False, message="Data tidak lengkap"), 400
 
-        device = DeviceLog.query.filter_by(
-            nama_perangkat=data["device"]
-        ).first()
+        with db_lock:
+            device = DeviceLog.query.filter_by(
+                nama_perangkat=data["device"]
+            ).first()
 
-        if device:
-            device.status = data["status"]
-            device.last_seen = datetime.now()
-            db.session.commit()
-            return jsonify(success=True)
+            if device:
+                device.status = data["status"]
+                device.last_seen = datetime.now()
+                db.session.commit()
+                return jsonify(success=True)
             
         return jsonify(success=False, message="Device tidak ditemukan"), 404
     except Exception as e:
@@ -668,30 +694,32 @@ def update_device():
 @app.route('/device/toggle/<int:device_id>', methods=["POST"])
 def toggle_device(device_id):
 
-    device = DeviceLog.query.get(device_id)
+    with db_lock:
+        device = DeviceLog.query.get(device_id)
 
-    if device:
-        if device.status == "ON":
-            device.status = "OFF"
-        else:
-            device.status = "ON"
-        db.session.commit()
+        if device:
+            if device.status == "ON":
+                device.status = "OFF"
+            else:
+                device.status = "ON"
+            db.session.commit()
 
     return redirect(url_for("devices_page"))
 
 @app.route("/api/device")
 def device_api():
     try:
-        devices = DeviceLog.query.all()
-        
-        device_list = [
-            {
-                "id": d.id,
-                "device": d.nama_perangkat,
-                "status": d.status
-            }
-            for d in devices
-        ]
+        with db_lock:
+            devices = DeviceLog.query.all()
+            
+            device_list = [
+                {
+                    "id": d.id,
+                    "device": d.nama_perangkat,
+                    "status": d.status
+                }
+                for d in devices
+            ]
         
         # Diubah menjadi format Dictionary agar script poller di Pi tidak crash '.get'
         return jsonify({"success": True, "devices": device_list})
@@ -705,15 +733,16 @@ def api_weight():
         if not data:
             return jsonify(success=False, message="No data received"), 400
             
-        status = BinStatus.query.get(1)
-        if not status:
-            status = BinStatus(id=1)
-            db.session.add(status)
-            
-        status.berat_medis = data.get("medis", 0)
-        status.berat_non_medis = data.get("non_medis", 0)
+        with db_lock:
+            status = BinStatus.query.get(1)
+            if not status:
+                status = BinStatus(id=1)
+                db.session.add(status)
+                
+            status.berat_medis = data.get("medis", 0)
+            status.berat_non_medis = data.get("non_medis", 0)
 
-        db.session.commit()
+            db.session.commit()
 
         # Emit websocket event untuk real-time berat update
         try:
@@ -747,21 +776,22 @@ def api_capacity():
         if not data:
             return jsonify(success=False, message="No data received"), 400
             
-        status = BinStatus.query.get(1)
-        if not status:
-            status = BinStatus(id=1)
-            db.session.add(status)
-            
-        status.jarak_medis = data["medis"]["jarak"]
-        status.status_medis = data["medis"]["status"]
-        status.jarak_non_medis = data["non_medis"]["jarak"]
-        status.status_non_medis = data["non_medis"]["status"]
+        with db_lock:
+            status = BinStatus.query.get(1)
+            if not status:
+                status = BinStatus(id=1)
+                db.session.add(status)
+                
+            status.jarak_medis = data["medis"]["jarak"]
+            status.status_medis = data["medis"]["status"]
+            status.jarak_non_medis = data["non_medis"]["jarak"]
+            status.status_non_medis = data["non_medis"]["status"]
 
-        db.session.commit()
+            db.session.commit()
 
         # Emit websocket event untuk real-time UI update
-        BIN_EMPTY_CM = 30.0
-        BIN_FULL_CM = 5.0
+        BIN_EMPTY_CM = 60.0
+        BIN_FULL_CM = 30.0
         def fp(j):
             if not j or j <= 0: return 0
             return round(max(0, min(100, ((BIN_EMPTY_CM - j) / (BIN_EMPTY_CM - BIN_FULL_CM)) * 100)), 1)
@@ -1034,8 +1064,9 @@ def api_trash():
         image_path=image_path
     )
 
-    db.session.add(log)
-    db.session.commit()
+    with db_lock:
+        db.session.add(log)
+        db.session.commit()
 
     socketio.emit(
         "new_trash",

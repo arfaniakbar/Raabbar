@@ -1,5 +1,5 @@
 """
-SMART TRASH BIN - IOT CLIENT INTEGRATED WITH WEBSITE API
+TRASH BIN - IOT CLIENT INTEGRATED WITH WEBSITE API
 ======================================================================
 """
 
@@ -18,6 +18,8 @@ import RPi.GPIO as GPIO
 from flask import Flask, jsonify
 from flask_cors import CORS
 import requests  # Ditambahkan untuk komunikasi ke Website Flask
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 # =====================================================================
 # CONFIG SERVER & API URL
@@ -28,6 +30,20 @@ API_WEIGHT = URL_WEBSITE_BASE + "/api/weight"
 API_CAPACITY = URL_WEBSITE_BASE + "/api/capacity"
 API_DEVICE_STATUS = URL_WEBSITE_BASE + "/api/device/status"
 API_DEVICE_CONTROL = URL_WEBSITE_BASE + "/api/device"
+
+# =====================================================================
+# GLOBAL HTTP SESSION (Untuk mencegah Connection Reset / Timeout)
+# =====================================================================
+api_session = requests.Session()
+retry_strategy = Retry(
+    total=3,
+    backoff_factor=1.0,
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=["HEAD", "GET", "OPTIONS", "POST"]
+)
+adapter = HTTPAdapter(max_retries=retry_strategy, pool_connections=10, pool_maxsize=10)
+api_session.mount("http://", adapter)
+api_session.mount("https://", adapter)
 
 # =====================================================================
 # 0. STATE GLOBAL (Thread-Safe)
@@ -72,10 +88,14 @@ def update_state(section: str, data: dict):
 def kirim_api_async(url: str, payload: dict, files: dict = None):
     def run():
         try:
+            headers = {
+                "User-Agent": "Raabbar-IoT-Client/1.0",
+                "Accept": "application/json"
+            }
             if files:
-                response = requests.post(url, data=payload, files=files, timeout=15.0)
+                response = api_session.post(url, data=payload, files=files, headers=headers, timeout=25.0)
             else:
-                response = requests.post(url, json=payload, timeout=10.0)
+                response = api_session.post(url, json=payload, headers=headers, timeout=20.0)
 
             if response.status_code not in [200, 201]:
                 print(f"[API-WARN] Gagal mengirim ke {url}. Respon: {response.status_code}")
@@ -561,6 +581,9 @@ def thread_ultrasonic():
         if jarak <= 50: return "Hampir Penuh"
         return "Kosong"
 
+    last_stat_um = "ON"
+    last_stat_un = "ON"
+
     while not shutdown_event.is_set():
         if not raspberry_enabled.is_set():
             time.sleep(1.0)
@@ -576,10 +599,20 @@ def thread_ultrasonic():
             if ultrasonik_medis_enabled.is_set():
                 j_medis = ambil_jarak_stabil(TRIG_MEDIS, ECHO_MEDIS)
                 stat_medis = cek_kapasitas(j_medis)
+                
+                cur_stat_um = "ERROR" if stat_medis == "Error" else "ON"
+                if cur_stat_um != last_stat_um:
+                    kirim_status_device("Sensor Ultrasonik Medis", cur_stat_um)
+                    last_stat_um = cur_stat_um
 
             if ultrasonik_non_medis_enabled.is_set():
                 j_non_medis = ambil_jarak_stabil(TRIG_NON_MEDIS, ECHO_NON_MEDIS)
                 stat_non_medis = cek_kapasitas(j_non_medis)
+                
+                cur_stat_un = "ERROR" if stat_non_medis == "Error" else "ON"
+                if cur_stat_un != last_stat_un:
+                    kirim_status_device("Sensor Ultrasonik Non-Medis", cur_stat_un)
+                    last_stat_un = cur_stat_un
 
             update_state("capacity", {
                 "medis": {"jarak_cm": j_medis, "status": stat_medis},
@@ -622,6 +655,9 @@ def thread_timbangan():
 
     berat_m_prev = 0.0
     berat_n_prev = 0.0
+    
+    last_stat_lm = "ON"
+    last_stat_ln = "ON"
 
     while not shutdown_event.is_set():
         if not raspberry_enabled.is_set():
@@ -634,6 +670,12 @@ def thread_timbangan():
 
             if loadcell_medis_enabled.is_set():
                 data_m = ambil_sampel(MEDIS_DT, MEDIS_SCK, SAMPEL_BACA, jeda_ms=5)
+                
+                cur_stat_lm = "ON" if data_m else "ERROR"
+                if cur_stat_lm != last_stat_lm:
+                    kirim_status_device("Sensor Load Cell Medis", cur_stat_lm)
+                    last_stat_lm = cur_stat_lm
+                    
                 if data_m:
                     raw_m, _ = rata_bersih(data_m)
                     berat_m = (raw_m - nol_medis) / MEDIS_FAKTOR
@@ -652,6 +694,12 @@ def thread_timbangan():
 
             if loadcell_non_medis_enabled.is_set():
                 data_n = ambil_sampel(NONMEDIS_DT, NONMEDIS_SCK, SAMPEL_BACA, jeda_ms=5)
+                
+                cur_stat_ln = "ON" if data_n else "ERROR"
+                if cur_stat_ln != last_stat_ln:
+                    kirim_status_device("Sensor Load Cell Non-Medis", cur_stat_ln)
+                    last_stat_ln = cur_stat_ln
+                    
                 if data_n:
                     raw_n, _ = rata_bersih(data_n)
                     berat_n = (raw_n - nol_nonmedis) / NONMEDIS_FAKTOR
@@ -688,17 +736,21 @@ def thread_timbangan():
         except Exception as e:
             log_error(f"[TIMBANGAN] Loop error: {e}")
         
-        # Dipercepat dari 1.5 detik menjadi 0.5 detik agar respon di web lebih gesit!
-        time.sleep(0.5)
+        # Dikembalikan ke 1.5 detik agar server VPS tidak kewalahan dan menyebabkan timeout!
+        time.sleep(1.5)
 
 # =====================================================================
 # ⑤ THREAD DEVICE CONTROL (GET DARI WEBSITE SECARA BERKALA)
 # =====================================================================
 def thread_device_control_poller():
     print("[SYSTEM] Thread Poller ON/OFF Kontrol Device Aktif.")
+    headers = {
+        "User-Agent": "Raabbar-IoT-Client/1.0",
+        "Accept": "application/json"
+    }
     while not shutdown_event.is_set():
         try:
-            response = requests.get(API_DEVICE_CONTROL, timeout=10.0)
+            response = api_session.get(API_DEVICE_CONTROL, headers=headers, timeout=20.0)
             if response.status_code == 200:
                 data = response.json()
                 
