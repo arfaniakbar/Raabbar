@@ -907,8 +907,14 @@ def history():
     if end_date:
         query = query.filter(db.func.date(TrashLog.created_at) <= end_date)
     if q:
-        like = f"%{q}%"
-        query = query.filter(TrashLog.kategori.ilike(like))
+        q_lower = q.lower()
+        if q_lower in ["medis", "medical"]:
+            query = query.filter(TrashLog.kategori == "Medical")
+        elif q_lower in ["non-medis", "non medis", "non medical", "nonmedical"]:
+            query = query.filter(TrashLog.kategori == "Non Medical")
+        else:
+            like = f"%{q}%"
+            query = query.filter(TrashLog.kategori.ilike(like))
 
     query = query.order_by(TrashLog.created_at.desc())
     total = query.count()
