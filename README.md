@@ -1,5 +1,5 @@
 # Raabbar
-# Smart Medical Waste Classification
+# Medical Waste Classification
 
 Sistem klasifikasi sampah medis dan non-medis berbasis Raspberry Pi dan Flask.
 

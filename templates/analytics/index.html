@@ -16,10 +16,10 @@
             <!-- Quick filters -->
             <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="text-xs font-medium text-gray-500 dark:text-gray-400 mr-1">Rentang:</span>
-                <a href="/analytics" class="px-3 py-1.5 text-xs font-medium rounded-lg transition {% if not analytics_filters.start_date and not analytics_filters.end_date %}bg-brand-600 text-white shadow-sm{% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %}">Semua</a>
-                <a href="/analytics?start_date={{ today_str }}&end_date={{ today_str }}" class="px-3 py-1.5 text-xs font-medium rounded-lg transition {% if analytics_filters.start_date == today_str and analytics_filters.end_date == today_str %}bg-brand-600 text-white shadow-sm{% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %}">Hari Ini</a>
-                <a href="/analytics?start_date={{ week_start }}&end_date={{ today_str }}" class="px-3 py-1.5 text-xs font-medium rounded-lg transition {% if analytics_filters.start_date == week_start %}bg-brand-600 text-white shadow-sm{% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %}">Minggu Ini</a>
-                <a href="/analytics?start_date={{ month_start }}&end_date={{ today_str }}" class="px-3 py-1.5 text-xs font-medium rounded-lg transition {% if analytics_filters.start_date == month_start %}bg-brand-600 text-white shadow-sm{% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %}">Bulan Ini</a>
+                <a href="/analytics?btn=semua" class="px-3 py-1.5 text-xs font-medium rounded-lg transition {% if request.args.get('btn') == 'semua' or (not request.args.get('btn') and not analytics_filters.start_date and not analytics_filters.end_date) %}bg-brand-600 text-white shadow-sm{% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %}">Semua</a>
+                <a href="/analytics?start_date={{ today_str }}&end_date={{ today_str }}&btn=hari" class="px-3 py-1.5 text-xs font-medium rounded-lg transition {% if request.args.get('btn') == 'hari' or (not request.args.get('btn') and analytics_filters.start_date == today_str and analytics_filters.end_date == today_str) %}bg-brand-600 text-white shadow-sm{% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %}">Hari Ini</a>
+                <a href="/analytics?start_date={{ week_start }}&end_date={{ today_str }}&btn=minggu" class="px-3 py-1.5 text-xs font-medium rounded-lg transition {% if request.args.get('btn') == 'minggu' or (not request.args.get('btn') and analytics_filters.start_date == week_start) %}bg-brand-600 text-white shadow-sm{% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %}">Minggu Ini</a>
+                <a href="/analytics?start_date={{ month_start }}&end_date={{ today_str }}&btn=bulan" class="px-3 py-1.5 text-xs font-medium rounded-lg transition {% if request.args.get('btn') == 'bulan' or (not request.args.get('btn') and analytics_filters.start_date == month_start) %}bg-brand-600 text-white shadow-sm{% else %}bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %}">Bulan Ini</a>
             </div>
 
             <!-- Custom date range -->
@@ -65,7 +65,7 @@
         <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-5">
             <div class="flex items-center justify-between mb-3">
                 <div class="w-9 h-9 rounded-lg bg-red-50 dark:bg-red-900/30 flex items-center justify-center">
-                    <i data-lucide="alert-triangle" class="w-4.5 h-4.5 text-red-500"></i>
+                    <i data-lucide="plus-circle" class="w-4.5 h-4.5 text-red-500"></i>
                 </div>
             </div>
             <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Medis</p>

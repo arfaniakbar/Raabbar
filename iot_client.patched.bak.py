@@ -1,5 +1,5 @@
 """
-SMART TRASH BIN - IOT CLIENT INTEGRATED WITH WEBSITE API
+TRASH BIN - IOT CLIENT INTEGRATED WITH WEBSITE API
 PATCHED V2 - All bugs fixed (A-M), config-driven, production-ready
 ======================================================================
 """

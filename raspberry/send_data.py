@@ -1,5 +1,5 @@
 """
-SMART TRASH BIN - IOT CLIENT INTEGRATED WITH WEBSITE API
+TRASH BIN - IOT CLIENT INTEGRATED WITH WEBSITE API
 ======================================================================
 """
 

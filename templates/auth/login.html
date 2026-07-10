@@ -13,22 +13,22 @@
     <!-- Tailwind JIT CDN + config (same as base.html) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            fontFamily: { sans: ["Inter", "sans-serif"] },
-            colors: {
-              brand: {
-                50:  "#eef4ff", 100: "#dbe5ff", 200: "#bcd0ff",
-                300: "#8fb0ff", 400: "#5e8bff", 500: "#3b6bff",
-                600: "#2348c0", 700: "#1d3a99", 800: "#1a3180",
-                900: "#1a2c6a", 950: "#101a40",
-              }
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    fontFamily: { sans: ["Inter", "sans-serif"] },
+                    colors: {
+                        brand: {
+                            50: "#eef4ff", 100: "#dbe5ff", 200: "#bcd0ff",
+                            300: "#8fb0ff", 400: "#5e8bff", 500: "#3b6bff",
+                            600: "#2348c0", 700: "#1d3a99", 800: "#1a3180",
+                            900: "#1a2c6a", 950: "#101a40",
+                        }
+                    }
+                }
             }
-          }
-        }
-      };
+        };
     </script>
 
     <!-- Flowbite CSS -->
@@ -42,17 +42,20 @@
 
     <!-- Dark mode prevent flicker -->
     <script>
-      (function() {
-        const theme = localStorage.getItem('theme') || 'light';
-        if (theme === 'dark') document.documentElement.classList.add('dark');
-      })();
+        (function () {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
     </script>
 
     <style>
-      * { font-family: 'Inter', sans-serif; }
-      .brand-gradient {
-        background: linear-gradient(135deg, #1a3180 0%, #1d3a99 40%, #101a40 100%);
-      }
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .brand-gradient {
+            background: linear-gradient(135deg, #1a3180 0%, #1d3a99 40%, #101a40 100%);
+        }
     </style>
 </head>
 
@@ -60,16 +63,18 @@
     <div class="flex min-h-screen flex-col lg:flex-row">
 
         <!-- ===== LEFT PANEL ===== -->
-        <div class="brand-gradient relative hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between p-10 text-white overflow-hidden">
+        <div
+            class="brand-gradient relative hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between p-10 text-white overflow-hidden">
             <!-- Decorative circles -->
-            <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-            <div class="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/3"></div>
+            <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2">
+            </div>
+            <div class="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full translate-y-1/3 -translate-x-1/3">
+            </div>
 
             <!-- Logo -->
             <div class="relative z-10">
-                <a href="/" class="inline-flex items-center gap-3">
-                    <img src="/asset/img/logo_white.png" alt="wastescan" class="h-14 w-14">
-                    <span class="text-2xl font-bold tracking-tight">wastescan</span>
+                <a href="/" class="inline-flex items-center justify-center bg-white p-2 rounded-2xl shadow-xl">
+                    <img src="/asset/img/logo.png?v=2" alt="wastescan" class="h-20 w-auto object-contain">
                 </a>
             </div>
 
@@ -77,7 +82,7 @@
             <div class="relative z-10 space-y-8">
                 <div class="space-y-2">
                     <h2 class="text-2xl font-semibold leading-snug">
-                        Sistem Monitoring<br>Smart Trash Bin
+                        Sistem Monitoring<br>Trash Bin
                     </h2>
                     <p class="text-base text-white/70 max-w-sm">
                         Solusi cerdas untuk klasifikasi dan monitoring sampah medis & non-medis secara real-time.
@@ -86,42 +91,50 @@
 
                 <div class="space-y-5">
                     <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
                             <i data-lucide="cpu" class="w-5 h-5"></i>
                         </div>
                         <div>
                             <h3 class="text-sm font-semibold">Klasifikasi Otomatis</h3>
-                            <p class="text-xs text-white/60 mt-0.5">Deteksi sampah medis & non-medis menggunakan sensor dan model AI TFLite</p>
+                            <p class="text-xs text-white/60 mt-0.5">Deteksi sampah medis & non-medis menggunakan sensor
+                                dan model AI TFLite</p>
                         </div>
                     </div>
 
                     <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
                             <i data-lucide="radio" class="w-5 h-5"></i>
                         </div>
                         <div>
                             <h3 class="text-sm font-semibold">Monitoring Real-Time</h3>
-                            <p class="text-xs text-white/60 mt-0.5">Pantau kapasitas, berat, dan status tempat sampah secara langsung dari dashboard</p>
+                            <p class="text-xs text-white/60 mt-0.5">Pantau kapasitas, berat, dan status tempat sampah
+                                secara langsung dari dashboard</p>
                         </div>
                     </div>
 
                     <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
                             <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
                         </div>
                         <div>
                             <h3 class="text-sm font-semibold">Analitik Lengkap</h3>
-                            <p class="text-xs text-white/60 mt-0.5">Laporan statistik harian, mingguan, dan bulanan untuk pengambilan keputusan</p>
+                            <p class="text-xs text-white/60 mt-0.5">Laporan statistik harian, mingguan, dan bulanan
+                                untuk pengambilan keputusan</p>
                         </div>
                     </div>
 
                     <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0 mt-0.5">
                             <i data-lucide="bell" class="w-5 h-5"></i>
                         </div>
                         <div>
                             <h3 class="text-sm font-semibold">Notifikasi Cerdas</h3>
-                            <p class="text-xs text-white/60 mt-0.5">Peringatan otomatis saat kapasitas penuh atau terdeteksi sampah tidak sesuai kategori</p>
+                            <p class="text-xs text-white/60 mt-0.5">Peringatan otomatis saat kapasitas penuh atau
+                                terdeteksi sampah tidak sesuai kategori</p>
                         </div>
                     </div>
                 </div>
@@ -129,7 +142,7 @@
 
             <!-- Footer -->
             <div class="relative z-10 text-xs text-white/40">
-                &copy; 2026 wastescan &mdash; Smart Trash Bin Monitoring System
+                &copy; 2026 wastescan &mdash; Trash Bin Monitoring System
             </div>
         </div>
 
@@ -137,9 +150,10 @@
         <div class="flex flex-1 flex-col justify-center px-6 py-12 lg:px-12 xl:px-20">
 
             <!-- Mobile logo -->
-            <div class="lg:hidden mb-10 text-center">
-                <img src="/asset/img/logo.png" alt="wastescan" class="h-16 w-16 mx-auto">
-                <h2 class="mt-3 text-xl font-bold text-gray-900 dark:text-white">wastescan</h2>
+            <div class="lg:hidden mb-10 text-center flex justify-center">
+                <div class="inline-flex items-center justify-center bg-white p-2 rounded-2xl shadow-md dark:shadow-none">
+                    <img src="/asset/img/logo.png?v=2" alt="wastescan" class="h-20 w-auto object-contain">
+                </div>
             </div>
 
             <div class="mx-auto w-full max-w-sm">
@@ -151,7 +165,8 @@
                 </div>
 
                 {% if error %}
-                <div class="flex items-center gap-2 p-3 mb-5 text-sm text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 rounded-lg border border-red-200 dark:border-red-800">
+                <div
+                    class="flex items-center gap-2 p-3 mb-5 text-sm text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 rounded-lg border border-red-200 dark:border-red-800">
                     <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0"></i>
                     <span>{{ error }}</span>
                 </div>
@@ -207,4 +222,5 @@
         }
     </script>
 </body>
+
 </html>

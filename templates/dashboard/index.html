@@ -9,7 +9,7 @@
         <div class="flex items-center justify-between flex-wrap gap-3">
             <div>
                 <h2 class="text-lg font-bold">Selamat datang, {{ session.get("username", "Admin") }}!</h2>
-                <p class="text-sm text-brand-100 mt-0.5">Monitoring real-time Smart Trash Bin</p>
+                <p class="text-sm text-brand-100 mt-0.5">Monitoring real-time Trash Bin</p>
             </div>
             <div class="flex items-center gap-2">
                 <span class="inline-flex items-center gap-1.5 text-xs bg-white/20 backdrop-blur px-3 py-1.5 rounded-full">
@@ -47,11 +47,11 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Medical</p>
+                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Medis</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ medis_count }}</p>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/30 flex items-center justify-center">
-                    <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
                 </div>
             </div>
             <div class="flex items-center gap-1.5 mt-2">
@@ -64,7 +64,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Non Medical</p>
+                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Non-Medis</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ non_medis_count }}</p>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center">
@@ -88,10 +88,10 @@
                     <h2 class="text-base font-semibold text-gray-900 dark:text-white">Statistik Per Jam</h2>
                     <div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                         <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700">
-                            <span class="w-2 h-2 rounded-full bg-red-500"></span> Medical
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span> Medis
                         </span>
                         <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700">
-                            <span class="w-2 h-2 rounded-full bg-green-500"></span> Non-Medical
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span> Non-Medis
                         </span>
                     </div>
                 </div>
@@ -151,6 +151,7 @@
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium
                         {% if bin_capacity.medis.status == 'Penuh' %}bg-red-100 text-red-700
                         {% elif bin_capacity.medis.status == 'Hampir Penuh' %}bg-yellow-100 text-yellow-700
+                        {% elif bin_capacity.medis.status == 'Error' %}bg-red-100 text-red-700 font-bold border border-red-500
                         {% else %}bg-green-100 text-green-700{% endif %}">
                         {{ bin_capacity.medis.status }}
                     </span>
@@ -181,6 +182,7 @@
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium
                         {% if bin_capacity.non_medis.status == 'Penuh' %}bg-red-100 text-red-700
                         {% elif bin_capacity.non_medis.status == 'Hampir Penuh' %}bg-blue-100 text-blue-700
+                        {% elif bin_capacity.non_medis.status == 'Error' %}bg-red-100 text-red-700 font-bold border border-red-500
                         {% else %}bg-green-100 text-green-700{% endif %}">
                         {{ bin_capacity.non_medis.status }}
                     </span>
@@ -227,8 +229,8 @@ var options = {
         animations: { enabled: true, easing: 'easeinout', speed: 800 }
     },
     series: [
-        { name: 'Medical', data: chartData.medical },
-        { name: 'Non-Medical', data: chartData.nonmedical }
+        { name: 'Medis', data: chartData.medical },
+        { name: 'Non-Medis', data: chartData.nonmedical }
     ],
     xaxis: {
         categories: chartData.labels,
