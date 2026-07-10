@@ -571,62 +571,27 @@ def analytics():
     medical_series = []
     non_medical_series = []
 
-    if is_all_time:
-        # Get the first record date to know where to start the chart
-        first_log = TrashLog.query.order_by(TrashLog.created_at.asc()).first()
-        if first_log and first_log.created_at:
-            start_dt = first_log.created_at.replace(tzinfo=timezone)
-            start_dt = start_dt.replace(hour=0, minute=0, second=0)
-        else:
-            start_dt = today.replace(hour=0, minute=0, second=0)
-
-    # Fetch aggregated chart data in a single query
-    chart_result = db.session.query(
-        db.func.date(TrashLog.created_at),
-        TrashLog.kategori,
-        db.func.count(TrashLog.id)
-    ).filter(
-        TrashLog.created_at >= start_dt,
-        TrashLog.created_at <= end_dt
-    ).group_by(
-        db.func.date(TrashLog.created_at),
-        TrashLog.kategori
-    ).all()
-
-    # Organize data by date
-    chart_data = {}
-    for tanggal, kategori, jumlah in chart_result:
-        # Format the date properly for the dictionary key
-        if isinstance(tanggal, str):
-            tanggal_obj = datetime.strptime(tanggal, '%Y-%m-%d').date()
-        else:
-            tanggal_obj = tanggal
-        
-        tanggal_str = tanggal_obj.strftime('%d %b')
-        if tanggal_str not in chart_data:
-            chart_data[tanggal_str] = {'Medical': 0, 'Non Medical': 0}
-        
-        chart_data[tanggal_str][kategori] = jumlah
-
-    # Generate complete timeline from start_dt to end_dt
     num_days = (end_dt.date() - start_dt.date()).days + 1
-    
-    # Optional safeguard against extreme dates (e.g. 10 years), cap at 365 days max for rendering speed
-    if num_days > 365:
-        start_dt = end_dt - timedelta(days=364)
-        num_days = 365
+    # Cap at 31 days to avoid too many bars
+    if num_days > 31:
+        num_days = 31
 
     for i in range(num_days):
         day = start_dt + timedelta(days=i)
-        day_str = day.strftime("%d %b")
-        labels.append(day_str)
-        
-        if day_str in chart_data:
-            medical_series.append(chart_data[day_str]['Medical'])
-            non_medical_series.append(chart_data[day_str]['Non Medical'])
-        else:
-            medical_series.append(0)
-            non_medical_series.append(0)
+        labels.append(day.strftime("%d %b"))
+
+        medis = TrashLog.query.filter(
+            db.func.date(TrashLog.created_at) == day.date(),
+            TrashLog.kategori == "Medical"
+        ).count()
+
+        nonmedis = TrashLog.query.filter(
+            db.func.date(TrashLog.created_at) == day.date(),
+            TrashLog.kategori == "Non Medical"
+        ).count()
+
+        medical_series.append(medis)
+        non_medical_series.append(nonmedis)
 
     # Latest logs (filtered by date range)
     latest_logs = base_query.order_by(
