@@ -115,10 +115,10 @@
             </div>
             <div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700">
-                    <span class="w-2 h-2 rounded-full bg-red-500"></span> Medical
+                    <span class="w-2 h-2 rounded-full bg-red-500"></span> Medis
                 </span>
                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700">
-                    <span class="w-2 h-2 rounded-full bg-green-500"></span> Non-Medical
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span> Non-Medis
                 </span>
             </div>
         </div>
@@ -193,8 +193,8 @@ var weeklyOptions = {
         animations: { enabled: true, easing: 'easeinout', speed: 600 }
     },
     series: [
-        { name: 'Medical', data: weeklyData.medical },
-        { name: 'Non-Medical', data: weeklyData.nonmedical }
+        { name: 'Medis', data: weeklyData.medical },
+        { name: 'Non-Medis', data: weeklyData.nonmedical }
     ],
     plotOptions: {
         bar: { borderRadius: 6, columnWidth: '50%' }
