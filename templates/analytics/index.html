@@ -23,19 +23,19 @@
             </div>
 
             <!-- Custom date range -->
-            <form method="GET" action="/analytics" class="flex items-end gap-2">
-                <div>
+            <form method="GET" action="/analytics" class="grid grid-cols-2 md:flex md:flex-row md:items-end gap-2 w-full md:w-auto mt-3 md:mt-0">
+                <div class="col-span-1">
                     <label class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Dari</label>
                     <input type="date" name="start_date" value="{{ analytics_filters.start_date }}"
-                        class="px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        class="w-full px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
                 </div>
-                <div>
+                <div class="col-span-1">
                     <label class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Sampai</label>
                     <input type="date" name="end_date" value="{{ analytics_filters.end_date }}"
-                        class="px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        class="w-full px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
                 </div>
                 <button type="submit"
-                    class="inline-flex items-center gap-1 px-4 py-1.5 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition">
+                    class="col-span-2 w-full md:w-auto inline-flex justify-center items-center gap-1 px-4 py-1.5 text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition h-[38px]">
                     <i data-lucide="filter" class="w-3.5 h-3.5"></i>
                     Terapkan
                 </button>
