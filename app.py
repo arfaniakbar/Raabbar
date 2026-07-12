@@ -311,6 +311,9 @@ def dashboard():
         type=int
     )
 
+    # Set calendar to start on Sunday (to match the HTML table layout: Min, Sen, Sel...)
+    calendar.setfirstweekday(calendar.SUNDAY)
+
     month_matrix = calendar.monthcalendar(
         selected_year,
         selected_month
