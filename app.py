@@ -99,7 +99,7 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 # DATA: Daftar device IoT
 # ==========================================
 
-timezone = pytz.timezone('Asia/Jakarta')
+timezone = WITA
 
 devices = [
     {
