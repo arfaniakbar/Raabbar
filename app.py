@@ -583,13 +583,24 @@ def analytics():
         day = start_dt + timedelta(days=i)
         labels.append(day.strftime("%d %b"))
 
+        # Hitung batas awal dan akhir hari ini (dalam zona waktu WITA)
+        day_start_wita = day.replace(hour=0, minute=0, second=0, tzinfo=timezone)
+        day_end_wita = day.replace(hour=23, minute=59, second=59, tzinfo=timezone)
+        
+        # Konversi ke UTC karena database SQLite menyimpan waktu dalam UTC
+        import pytz
+        day_start_utc = day_start_wita.astimezone(pytz.utc).replace(tzinfo=None)
+        day_end_utc = day_end_wita.astimezone(pytz.utc).replace(tzinfo=None)
+
         medis = TrashLog.query.filter(
-            db.func.date(TrashLog.created_at) == day.date(),
+            TrashLog.created_at >= day_start_utc,
+            TrashLog.created_at <= day_end_utc,
             TrashLog.kategori == "Medical"
         ).count()
 
         nonmedis = TrashLog.query.filter(
-            db.func.date(TrashLog.created_at) == day.date(),
+            TrashLog.created_at >= day_start_utc,
+            TrashLog.created_at <= day_end_utc,
             TrashLog.kategori == "Non Medical"
         ).count()
 
