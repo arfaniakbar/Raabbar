@@ -52,15 +52,16 @@
                 </div>
 
                 <!-- DATE RANGE -->
-                <div>
-                    <label class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-0.5">Range</label>
-                    <div class="flex gap-1">
+                <div class="flex items-center gap-2">
+                    <div>
+                        <label class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-0.5">Dari</label>
                         <input type="date" name="start_date" value="{{ filters.start_date }}"
-                            class="w-[120px] px-2 py-1.5 text-xs border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
-                            placeholder="Dari">
+                            class="w-[120px] px-2 py-1.5 text-xs border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-0.5">Sampai</label>
                         <input type="date" name="end_date" value="{{ filters.end_date }}"
-                            class="w-[120px] px-2 py-1.5 text-xs border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
-                            placeholder="Sampai">
+                            class="w-[120px] px-2 py-1.5 text-xs border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100">
                     </div>
                 </div>
 
