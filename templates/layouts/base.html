@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="id" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/asset/img/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/asset/img/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="/asset/img/favicon-64.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/asset/img/apple-touch-icon.png">
+    <title>{% block title %}Dashboard{% endblock %} - wastescan</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: { sans: ["Inter", "sans-serif"] },
+            colors: {
+              brand: {
+                50:  "#eef4ff", 100: "#dbe5ff", 200: "#bcd0ff",
+                300: "#8fb0ff", 400: "#5e8bff", 500: "#3b6bff",
+                600: "#2348c0", 700: "#1d3a99", 800: "#1a3180",
+                900: "#1a2c6a", 950: "#101a40",
+              }
+            }
+          }
+        }
+      };
+    </script>
+
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <!-- LUCIDE ICONS -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+
+    <!-- DARK MODE PREVENT FLICKER -->
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        if (theme === 'dark') document.documentElement.classList.add('dark');
+      })();
+    </script>
+
+    <style>
+      body { font-family: 'Inter', sans-serif; }
+      html { background-color: #f5f7fb; }
+      html.dark { background-color: #1a2440; }
+      html.dark body { background-color: #1a2440 !important; }
+
+      .scroll-zone { scrollbar-width: thin; }
+      .scroll-zone::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scroll-zone::-webkit-scrollbar-thumb { background: rgba(35,72,192,0.3); border-radius: 3px; }
+      html.dark .scroll-zone::-webkit-scrollbar-thumb { background: rgba(143,176,255,0.3); }
+
+      /* Smooth theme transition — animate colors on all elements */
+      *, *::before, *::after {
+        transition: background-color 0.3s ease, color 0.3s ease,
+                    border-color 0.3s ease, fill 0.3s ease, stroke 0.3s ease,
+                    box-shadow 0.3s ease;
+      }
+      /* Exclude charts and progress bars from color transition (they animate independently) */
+      .apexcharts-canvas, .apexcharts-canvas *,
+      [class*="fill-"], [style*="width:"] {
+        transition: none !important;
+      }
+    </style>
+</head>
+
+<body class="bg-[#f5f7fb] dark:bg-[#1a2440] text-slate-800 dark:text-slate-200 min-h-screen">
+
+    <!-- TOPBAR -->
+    <nav class="fixed top-0 left-0 right-0 z-40 h-14 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+        <div class="h-full px-3 flex items-center justify-between">
+
+            <div class="flex items-center gap-2">
+                <!-- MOBILE DRAWER TOGGLE (single hamburger, mobile only) -->
+                <button data-drawer-target="sidebar" data-drawer-toggle="sidebar" aria-controls="sidebar" type="button"
+                    class="inline-flex lg:hidden items-center p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+
+                <!-- LOGO -->
+                <a href="/" class="flex items-center gap-2 ml-1 lg:ml-2">
+                    <img src="/asset/img/logo.png" alt="wastescan" class="h-8 w-8">
+                    <span class="text-base font-semibold text-slate-800 dark:text-slate-100">wastescan</span>
+                </a>
+            </div>
+
+            <!-- RIGHT (THEME + NOTIF + PROFILE) -->
+            <div class="flex items-center gap-1.5">
+                <!-- THEME TOGGLE -->
+                <button id="theme-toggle" type="button"
+                    class="p-2 rounded-lg text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <svg id="theme-icon-sun" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                    <svg id="theme-icon-moon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+                <!-- NOTIF BELL -->
+                <div class="relative">
+                    <button id="notif-button" data-dropdown-toggle="notif-dropdown" type="button"
+                        class="relative p-2 rounded-lg text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span id="notif-badge" class="hidden absolute top-1 right-1 min-w-[16px] h-[16px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center"></span>
+                    </button>
+                    <div id="notif-dropdown" class="z-50 hidden w-80 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 divide-y divide-slate-200 dark:divide-slate-700">
+                        <div class="px-4 py-3">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Notifikasi</h3>
+                                <span id="notif-count" class="text-xs text-slate-500 dark:text-slate-400"></span>
+                            </div>
+                        </div>
+                        <div id="notif-list" class="max-h-80 overflow-y-auto scroll-zone"></div>
+                    </div>
+                </div>
+
+                <!-- PROFILE -->
+                <div class="flex items-center gap-2 ml-1.5 pl-2 border-l border-slate-200 dark:border-slate-700">
+
+                    <a href="/logout" class="p-2 rounded-lg text-slate-500 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400" title="Keluar">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </a>
+                    <button type="button" data-modal-target="profile-modal" data-modal-toggle="profile-modal"
+                        class="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-semibold hover:bg-brand-700 focus:ring-2 focus:ring-brand-300 cursor-pointer overflow-hidden">
+                        {% if session.get("avatar_url") %}
+                        <img src="{{ session.get('avatar_url') }}?v={{ range(1000) | random }}" class="w-8 h-8 rounded-full object-cover">
+                        {% else %}
+                        {{ session.get("username", "Admin")[:1].upper() }}
+                        {% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SIDEBAR (Flowbite drawer — fixed on desktop, drawer on mobile) -->
+    <aside id="sidebar" aria-label="Sidebar"
+        class="fixed top-0 left-0 z-50 w-64 h-screen transition-transform -translate-x-full lg:translate-x-0 lg:top-14 lg:z-30 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 overflow-y-auto scroll-zone">
+        <div class="h-full px-3 py-4 pt-16 lg:pt-4">
+            <ul class="space-y-1 font-medium text-sm">
+                <li>
+                    <a href="/" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg {% if request.path == '/' %}bg-brand-600 text-white shadow-sm{% else %}text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700/40{% endif %}">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5 flex-shrink-0"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/analytics" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg {% if request.path == '/analytics' %}bg-brand-600 text-white shadow-sm{% else %}text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700/40{% endif %}">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5 flex-shrink-0"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/devices" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg {% if request.path == '/devices' %}bg-brand-600 text-white shadow-sm{% else %}text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700/40{% endif %}">
+                        <i data-lucide="cpu" class="w-5 h-5 flex-shrink-0"></i>
+                        <span>Perangkat</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/history" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg {% if request.path == '/history' %}bg-brand-600 text-white shadow-sm{% else %}text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700/40{% endif %}">
+                        <i data-lucide="history" class="w-5 h-5 flex-shrink-0"></i>
+                        <span>History</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="pt-14 min-h-screen lg:ml-60">
+        <div class="px-4 sm:px-6 py-6 max-w-[1450px] mx-auto">
+        {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- FLOWBITE -->
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <script>
+    const socket = io();
+
+    // =============================
+    // THEME TOGGLE
+    // =============================
+    function setTheme(theme) {
+        if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+        localStorage.setItem("theme", theme);
+        const sunIcon = document.getElementById("theme-icon-sun");
+        const moonIcon = document.getElementById("theme-icon-moon");
+        if (sunIcon) sunIcon.classList.toggle("hidden", theme === "dark");
+        if (moonIcon) moonIcon.classList.toggle("hidden", theme !== "dark");
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        setTheme(localStorage.getItem("theme") || "light");
+        const toggleBtn = document.getElementById("theme-toggle");
+        if (toggleBtn) {
+            toggleBtn.addEventListener("click", function() {
+                const cur = localStorage.getItem("theme") || "light";
+                setTheme(cur === "dark" ? "light" : "dark");
+            });
+        }
+        if (window.lucide) {
+            lucide.createIcons();
+        } else {
+            setTimeout(function() { if (window.lucide) lucide.createIcons(); }, 500);
+        }
+    });
+
+    // =============================
+    // NOTIFICATIONS
+    // =============================
+    function fetchNotifs() {
+        fetch("/api/notifications")
+            .then(r => r.json())
+            .then(j => {
+                const badge = document.getElementById("notif-badge");
+                const count = document.getElementById("notif-count");
+                const list = document.getElementById("notif-list");
+                if (!badge || !list) return;
+                if (!j.success || j.count === 0) {
+                    badge.classList.add("hidden");
+                    count.textContent = "0 notifikasi";
+                    list.innerHTML = '<div class="px-4 py-8 text-center text-xs text-slate-500 dark:text-slate-400">Tidak ada notifikasi</div>';
+                    return;
+                }
+                badge.classList.remove("hidden");
+                badge.textContent = j.count > 9 ? "9+" : String(j.count);
+                count.textContent = j.count + " notifikasi";
+                list.innerHTML = j.data.map(n => {
+                    const iconBg = n.type === "error" ? "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300" : "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300";
+                    return '<div class="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/40 border-b border-slate-100 dark:border-slate-700 last:border-b-0">' +
+                        '<div class="flex gap-3"><div class="w-8 h-8 rounded-full ' + iconBg + ' flex items-center justify-center flex-shrink-0">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 0 0 1.84-2.75L13.74 4a2 2 0 0 0-3.48 0L3.16 16.25A2 2 0 0 0 5 19Z"/></svg>' +
+                        '</div><div class="flex-1 min-w-0">' +
+                        '<p class="text-xs font-medium text-slate-800 dark:text-slate-100">' + n.title + '</p>' +
+                        '<p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">' + n.message + '</p>' +
+                        '</div></div></div>';
+                }).join("");
+            }).catch(() => {});
+    }
+    fetchNotifs();
+    setInterval(fetchNotifs, 15000);
+    socket.on("bin_update", fetchNotifs);
+
+    // =============================
+    // TRASH DETAIL MODAL
+    // =============================
+    function openTrashModal(id) {
+        const m = document.getElementById("trash-detail-modal");
+        if (m) m.classList.remove("hidden");
+        const content = document.getElementById("trash-detail-content");
+        if (content) content.innerHTML = '<div class="text-center py-4 text-slate-500">Loading...</div>';
+        fetch("/api/trash_log/" + id)
+            .then(r => r.json())
+            .then(j => {
+                if (j.success && content) {
+                    content.innerHTML =
+                        '<div class="grid grid-cols-2 gap-3 text-sm text-slate-800 dark:text-slate-200">' +
+                        (j.data.image_path ? '<div class="col-span-2"><img src="/static/uploads/' + j.data.image_path + '" class="rounded-lg w-full" /></div>' : '') +
+                        '  <div><span class="font-semibold">Kategori:</span> ' + j.data.kategori + '</div>' +
+                        '  <div><span class="font-semibold">Jenis:</span> ' + j.data.jenis_sampah + '</div>' +
+                        '  <div><span class="font-semibold">Confidence:</span> ' + Number(j.data.confidence).toFixed(1) + '%</div>' +
+                        '  <div><span class="font-semibold">Waktu:</span> ' + j.data.created_at + '</div>' +
+                        '</div>';
+                }
+            });
+    }
+    function closeTrashModal() {
+        const m = document.getElementById("trash-detail-modal");
+        if (m) m.classList.add("hidden");
+    }
+
+    // =============================
+    // SOCKET - new_trash toast
+    // =============================
+    socket.on("new_trash", function(data) {
+        const kategori = (data && data.kategori) || "Trash";
+        let container = document.getElementById("toast-container");
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "toast-container";
+            container.className = "fixed top-20 right-5 z-[9999] flex flex-col gap-2";
+            document.body.appendChild(container);
+        }
+        const toast = document.createElement("div");
+        toast.setAttribute("role", "alert");
+        toast.className = "flex items-center w-full max-w-xs p-4 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100";
+        toast.innerHTML =
+            '<div class="inline-flex items-center justify-center w-8 h-8 text-brand-600 bg-brand-50 dark:bg-brand-900/40 dark:text-brand-300 rounded-lg flex-shrink-0">' +
+            '    <i data-lucide="check-circle" class="w-5 h-5"></i>' +
+            '</div>' +
+            '<div class="ms-3 text-xs font-normal">Trash baru: <span class="font-semibold">' + kategori + '</span></div>' +
+            '<button type="button" onclick="this.parentElement.remove()" class="ms-auto p-1.5 rounded-lg inline-flex items-center justify-center h-8 w-8 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">' +
+            '    <i data-lucide="x" class="w-4 h-4"></i>' +
+            '</button>';
+        container.appendChild(toast);
+        if (window.lucide) lucide.createIcons();
+        setTimeout(() => { if (toast.parentElement) toast.remove(); }, 5000);
+
+        fetch("/api/bin_status")
+            .then(r => r.json())
+            .then(j => {
+                if (!j.success) return;
+                ["medis", "non_medis"].forEach(key => {
+                    const d = j[key];
+                    const bar = document.querySelector("[data-bin-bar=" + key + "]");
+                    if (bar) bar.style.width = d.fill_pct + "%";
+                    const pct = document.querySelector("[data-bin-pct=" + key + "]");
+                    if (pct) pct.textContent = d.fill_pct + "%";
+                    const berat = document.querySelector("[data-bin-berat=" + key + "]");
+                    if (berat) berat.textContent = d.berat_g.toFixed(1) + " g";
+                });
+            }).catch(() => {});
+    });
+
+    // =============================
+    // PROFILE MODAL FUNCTIONS
+    // =============================
+
+    async function uploadAvatar(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const msg = document.getElementById("avatar-msg");
+        const formData = new FormData();
+        formData.append("avatar", file);
+        msg.classList.remove("hidden");
+        msg.className = "text-xs text-blue-600 dark:text-blue-400";
+        msg.textContent = "Mengunggah...";
+        try {
+            const r = await fetch("/api/profile/avatar", {
+                method: "POST",
+                body: formData
+            });
+            const data = await r.json();
+            if (data.success) {
+                msg.className = "text-xs text-green-600 dark:text-green-400";
+                msg.textContent = "Foto profil berhasil diunggah!";
+                // Replace avatar with image
+                const preview = document.getElementById("profile-avatar-preview");
+                if (preview) {
+                    const img = document.createElement("img");
+                    img.src = data.avatar_url + "?v=" + Date.now();
+                    img.alt = "Avatar";
+                    img.id = "profile-avatar-img";
+                    img.className = "w-20 h-20 rounded-full object-cover border-2 border-brand-200 dark:border-brand-700";
+                    preview.parentNode.replaceChild(img, preview);
+                } else {
+                    const img = document.getElementById("profile-avatar-img");
+                    if (img) img.src = data.avatar_url + "?v=" + Date.now();
+                }
+                // Update navbar avatar
+                const navAvatar = document.querySelector("button[data-modal-target='profile-modal']");
+                if (navAvatar && data.avatar_url) {
+                    navAvatar.innerHTML = '<img src="' + data.avatar_url + '?v=' + Date.now() + '" class="w-8 h-8 rounded-full object-cover">';
+                }
+            } else {
+                msg.className = "text-xs text-red-600 dark:text-red-400";
+                msg.textContent = data.error || "Gagal mengunggah foto";
+            }
+        } catch (err) {
+            msg.className = "text-xs text-red-600 dark:text-red-400";
+            msg.textContent = "Gagal terhubung ke server";
+        }
+    }
+
+    async function updateUsername(e) {
+        e.preventDefault();
+        const newUsername = document.getElementById("new-username").value.trim();
+        const msg = document.getElementById("username-msg");
+        msg.classList.add("hidden");
+        if (!newUsername) return false;
+        msg.textContent = "Menyimpan...";
+        msg.className = "text-xs text-gray-500 dark:text-gray-400";
+        msg.classList.remove("hidden");
+        try {
+            const r = await fetch("/api/profile/username", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                credentials: "same-origin",
+                body: JSON.stringify({username: newUsername})
+            });
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            const data = await r.json();
+            if (data.success) {
+                msg.className = "text-xs text-green-600 dark:text-green-400";
+                msg.textContent = "Username berhasil diubah!";
+                const avatarPreview = document.getElementById("profile-avatar-preview");
+                if (avatarPreview) avatarPreview.textContent = newUsername[0].toUpperCase();
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                msg.className = "text-xs text-red-600 dark:text-red-400";
+                msg.textContent = data.error || "Gagal mengubah username";
+            }
+        } catch (err) {
+            msg.classList.remove("hidden");
+            msg.className = "text-xs text-red-600 dark:text-red-400";
+            msg.textContent = "Error: " + err.message;
+            console.error("updateUsername error:", err);
+        }
+        return false;
+    }
+
+    async function updatePassword(e) {
+        e.preventDefault();
+        const oldPw = document.getElementById("old-password").value;
+        const newPw = document.getElementById("new-password").value;
+        const msg = document.getElementById("password-msg");
+        msg.classList.add("hidden");
+        if (!oldPw || !newPw) return false;
+        msg.textContent = "Menyimpan...";
+        msg.className = "text-xs text-gray-500 dark:text-gray-400";
+        msg.classList.remove("hidden");
+        try {
+            const r = await fetch("/api/profile/password", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                credentials: "same-origin",
+                body: JSON.stringify({old_password: oldPw, new_password: newPw})
+            });
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            const data = await r.json();
+            if (data.success) {
+                msg.className = "text-xs text-green-600 dark:text-green-400";
+                msg.textContent = "Password berhasil diubah!";
+                document.getElementById("old-password").value = "";
+                document.getElementById("new-password").value = "";
+            } else {
+                msg.className = "text-xs text-red-600 dark:text-red-400";
+                msg.textContent = data.error || "Gagal mengubah password";
+            }
+        } catch (err) {
+            msg.classList.remove("hidden");
+            msg.className = "text-xs text-red-600 dark:text-red-400";
+            msg.textContent = "Error: " + err.message;
+            console.error("updatePassword error:", err);
+        }
+        return false;
+    }
+
+    // Init Lucide icons after everything loads
+    window.addEventListener('load', function() {
+        if (window.lucide) lucide.createIcons();
+    });
+    </script>
+
+    <!-- PROFILE MODAL -->
+    <div id="profile-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[9999] justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-md max-h-full">
+            <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Pengaturan Profil</h3>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="profile-modal">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="p-4 md:p-5 space-y-4">
+                    <!-- Avatar with upload -->
+                    <div class="flex flex-col items-center gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
+                        <div class="relative">
+                            {% if session.get("avatar_url") %}
+                            <img src="{{ session.get('avatar_url') }}?v={{ range(1000) | random }}" alt="Avatar"
+                                class="w-20 h-20 rounded-full object-cover border-2 border-brand-200 dark:border-brand-700" id="profile-avatar-img">
+                            {% else %}
+                            <div class="w-20 h-20 rounded-full bg-brand-600 flex items-center justify-center text-white text-3xl font-bold" id="profile-avatar-preview">
+                                {{ session.get("username", "Admin")[:1].upper() }}
+                            </div>
+                            {% endif %}
+                            <label for="avatar-file" class="absolute bottom-0 right-0 w-7 h-7 bg-brand-600 hover:bg-brand-700 rounded-full flex items-center justify-center cursor-pointer border-2 border-white dark:border-gray-800 shadow-sm">
+                                <i data-lucide="camera" class="w-3.5 h-3.5 text-white"></i>
+                            </label>
+                            <input type="file" id="avatar-file" accept="image/*" class="hidden" onchange="uploadAvatar(event)">
+                        </div>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ session.get("username", "Admin") }}</p>
+                        <p id="avatar-msg" class="text-xs hidden"></p>
+                    </div>
+
+                    <!-- Ganti Username -->
+                    <form id="form-username" onsubmit="return updateUsername(event)" class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-900 dark:text-white">Ganti Username</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-username" class="flex-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-brand-600 focus:border-brand-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Username baru" required>
+                            <button type="submit" class="text-white bg-brand-600 hover:bg-brand-700 focus:ring-4 focus:ring-brand-300 font-medium rounded-lg text-sm px-4 py-2.5 dark:focus:ring-brand-700">Simpan</button>
+                        </div>
+                        <p id="username-msg" class="text-xs hidden"></p>
+                    </form>
+
+                    <!-- Ganti Password -->
+                    <form id="form-password" onsubmit="return updatePassword(event)" class="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <label class="block text-sm font-medium text-gray-900 dark:text-white">Ganti Password</label>
+                        <input type="password" id="old-password" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-brand-600 focus:border-brand-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Password lama" required>
+                        <input type="password" id="new-password" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-brand-600 focus:border-brand-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Password baru" required>
+                        <button type="submit" class="w-full text-white bg-brand-600 hover:bg-brand-700 focus:ring-4 focus:ring-brand-300 font-medium rounded-lg text-sm px-4 py-2.5 dark:focus:ring-brand-700">Ganti Password</button>
+                        <p id="password-msg" class="text-xs hidden"></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

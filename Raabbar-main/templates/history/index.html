@@ -1,0 +1,162 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<form method="GET"
+class="flex gap-4 mb-6">
+
+    <select name="kategori"
+    class="flex-1 border rounded-xl px-4 py-3">
+
+        <option value="">
+            Jenis
+        </option>
+
+        <option value="Medical">
+            Medical
+        </option>
+
+        <option value="Non Medical">
+            Non Medical
+        </option>
+
+    </select>
+
+    <input
+    type="date"
+    name="tanggal"
+    class="flex-1 border rounded-xl px-4 py-3">
+
+    <select
+    name="jenis"
+    class="flex-1 border rounded-xl px-4 py-3">
+
+        <option value="">
+            Semua
+        </option>
+
+        <option value="Medical Waste">
+            Medical Waste
+        </option>
+
+        <option value="Cardboard">
+            Cardboard
+        </option>
+
+    </select>
+
+    <button
+    type="submit"
+    class="
+    bg-[#2348c0]
+    text-white
+    rounded-xl
+    px-8
+    font-semibold
+    flex
+    items-center
+    justify-center
+    min-w-[120px]
+    ">
+
+        Terapkan
+
+    </button>
+
+</form>
+
+
+
+<div class="bg-white rounded-[24px] border overflow-hidden shadow-sm">
+
+<table class="w-full text-sm">
+
+<thead>
+
+<tr class="bg-[#2348c0] text-white">
+
+<th class="w-32 p-4">
+    Gambar
+</th>
+
+<th class="p-4 text-left">
+Kategori
+</th>
+
+<th class="p-4 text-left">
+Jenis
+</th>
+
+<th class="p-4 text-left">
+Confidence
+</th>
+
+<th class="p-4 text-left">
+Jam
+</th>
+
+<th class="p-4 text-left">
+Tanggal
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for log in logs %}
+
+<tr class="border-b h-24">
+
+    <td class="p-4 text-center">
+
+        <div class="flex justify-center">
+
+                            <img
+                                src="{{ url_for('static', filename=log.image_path) }}"
+                                class="w-20 h-20 object-cover rounded-lg"
+                                style="
+                                width:80px;
+                                height:80px;
+                                object-fit:cover;
+                                border-radius:12px;
+                                border:1px solid #ddd;
+                                "
+                                class="hover:scale-110 transition duration-200">
+
+        </div>
+
+    </td>
+
+    <td class="p-4">
+        {{ log.kategori }}
+    </td>
+
+    <td class="p-4">
+        {{ log.jenis_sampah }}
+    </td>
+
+    <td class="p-4">
+        {{ "%.2f"|format(log.confidence*100) }}%
+    </td>
+
+    <td class="p-4">
+        {{ log.created_at.strftime('%H:%M') }}
+    </td>
+
+    <td class="p-4">
+        {{ log.created_at.strftime('%d %b %Y') }}
+    </td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% endblock %}

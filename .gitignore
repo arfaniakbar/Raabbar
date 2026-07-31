@@ -1,0 +1,7 @@
+static/uploads/
+data/
+*.zip
+__pycache__/
+venv/
+.env
+config.py

@@ -1,0 +1,13 @@
+=== IOT CLIENT PATCH v2.1 (saved 2026-07-03) ===
+File asli patched: /var/www/Raabbar/iot_client.patched.bak.py (48KB)
+File config patched: /var/www/Raabbar/iot_config.patched.bak.json (2.2KB)
+
+Fix bug "MENGUNCI fallback kena pause":
+- Jangan reset lock kalau label sama
+- Hard reset hanya kalau confidence < 30% atau label berubah
+
+14 bug fix awal + 13 bug tambahan (A-M) semua sudah di-include.
+
+Cara restore kalau temen push overwrite:
+  cp /var/www/Raabbar/iot_client.patched.bak.py /var/www/Raabbar/iot_client.py
+  cp /var/www/Raabbar/iot_config.patched.bak.json /var/www/Raabbar/iot_config.json

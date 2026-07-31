@@ -1,0 +1,82 @@
+{
+    "gpio_pins": {
+        "servo": 14,
+        "trig_medis": 24,
+        "echo_medis": 25,
+        "trig_non_medis": 8,
+        "echo_non_medis": 7,
+        "medis_dt": 17,
+        "medis_sck": 27,
+        "nonmedis_dt": 22,
+        "nonmedis_sck": 23
+    },
+    "servo": {
+        "duty_kiri": 3.5,
+        "duty_kanan": 11.5,
+        "duty_tengah": 7.5,
+        "step": 0.05,
+        "delay_step_ms": 15
+    },
+    "loadcell": {
+        "faktor_medis": 218.3,
+        "faktor_nonmedis": 218.3,
+        "sampel_warmup": 30,
+        "sampel_tare": 80,
+        "sampel_baca": 8,
+        "window_tampil": 3,
+        "sigma_filter": 2.0,
+        "dead_zone_min_gram": 0.5,
+        "max_noise_for_reliable": 50.0
+    },
+    "ultrasonic": {
+        "threshold_penuh_cm": 30,
+        "threshold_hampir_penuh_cm": 50,
+        "min_valid_cm": 2.0,
+        "max_valid_cm": 400.0,
+        "timeout_detik": 0.1,
+        "interval_kirim_detik": 3.0
+    },
+    "camera": {
+        "threshold_akurasi": 50.0,
+        "motion_threshold": 25,
+        "motion_min_area": 0.02,
+        "kalibrasi_frame": 20,
+        "alpha_kalibrasi": 0.1,
+        "alpha_standby": 0.05,
+        "model_labels": ["Non Medical", "Medical"],
+        "frame_width": 400,
+        "frame_height": 300
+    },
+    "api": {
+        "url_website_base": "http://72.62.124.168:8003",
+        "timeout_detik": 3.0,
+        "max_retry": 3,
+        "retry_backoff_detik": 1.5,
+        "rate_limit_weight_per_detik": 1.0,
+        "rate_limit_capacity_per_detik": 0.33,
+        "rate_limit_trash_per_detik": 5.0
+    },
+    "logging": {
+        "level": "INFO",
+        "file": "/var/log/iot_client.log",
+        "max_bytes": 5242880,
+        "backup_count": 3,
+        "console": true
+    },
+    "flask_local": {
+        "host": "0.0.0.0",
+        "port": 5000,
+        "auth_token": "CHANGE_ME_TO_SECURE_TOKEN",
+        "allowed_ips": ["127.0.0.1", "192.168.0.0/16", "10.0.0.0/8"]
+    },
+    "disk_check": {
+        "min_free_mb": 100,
+        "upload_path": "/tmp/iot_uploads"
+    },
+    "system": {
+        "sync_interval_detik": 60.0,
+        "error_threshold_for_status": 5,
+        "error_report_cooldown_detik": 30.0,
+        "shutdown_grace_detik": 10.0
+    }
+}

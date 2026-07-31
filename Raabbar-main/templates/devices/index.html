@@ -1,0 +1,85 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<h1 class="text-4xl font-bold text-[#2348c0] mb-6">
+    Perangkat
+</h1>
+
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+{% for device in devices %}
+
+    {% if device.status != 'ERROR' %}
+    <form action="{{ url_for('toggle_device', device_id=device.id) }}" method="POST" id="form-{{ device.id }}">
+        <div 
+            onclick="document.getElementById('form-{{ device.id }}').submit();"
+            class="w-full block relative rounded-[24px] border p-6 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:shadow-lg 
+            {% if device.status == 'ON' %}
+                bg-white border-[#dbe5ff]
+            {% else %}
+                bg-gray-100 border-gray-300 opacity-70
+            {% endif %}"
+        >
+            <div class="flex justify-between items-start">
+                <h3 class="text-[24px] font-bold text-[#2348c0]">
+                    {{ device.nama_perangkat }}
+                </h3>
+
+                <div class="w-12 h-12 rounded-full flex items-center justify-center text-white 
+                    {% if device.status == 'ON' %}
+                        bg-green-500
+                    {% elif device.status == 'OFF' %}
+                        bg-gray-400
+                    {% else %}
+                        bg-red-500
+                    {% endif %}">
+                    {% if device.status == 'ON' %} ✓ {% elif device.status == 'OFF' %} ⏻ {% else %} ⚠ {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <p class="text-[42px] font-bold 
+                    {% if device.status == 'ON' %} text-[#2348c0] 
+                    {% elif device.status == 'OFF' %} text-gray-500 
+                    {% else %} text-red-500 {% endif %}">
+                    {{ device.status }}
+                </p>
+                <p class="text-sm text-gray-400 mt-2">Klik card untuk mengubah status</p>
+            </div>
+        </div>
+    </form>
+
+    {% else %}
+    <div class="relative rounded-[24px] border border-red-200 bg-red-50 p-6">
+        <h3 class="text-2xl font-bold text-red-500">
+            {{ device.nama_perangkat }}
+        </h3>
+        <p class="text-4xl font-bold text-red-500 mt-6">
+            ERROR
+        </p>
+    </div>
+    {% endif %}
+
+{% endfor %}
+</div>
+
+{% if error_devices %}
+<div class="mt-6 border border-red-200 bg-red-50 rounded-[24px] p-8 flex justify-between items-center">
+    <div>
+        <h2 class="text-4xl font-bold text-red-500">
+            {{ error_devices|length }} Sensor Error
+        </h2>
+        {% for device in error_devices %}
+        <p class="text-2xl text-red-500 mt-2">
+            {{ device.nama_perangkat }} Tidak Dapat Terdeteksi
+        </p>
+        {% endfor %}
+    </div>
+    <div class="w-24 h-24 rounded-full bg-red-100 flex items-center justify-center text-5xl text-red-500">
+        ⚠
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

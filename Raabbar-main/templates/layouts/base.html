@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+    <title>MED.TRASH</title>
+
+    <!-- TAILWIND -->
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='css/output.css') }}">
+
+    <!-- FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+    <!-- APEX -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <!-- FULLCALENDAR -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css'
+    rel='stylesheet'>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+
+</head>
+
+<body class="bg-[#d9d9d9]
+font-[Poppins]
+overflow-hidden">
+
+    <!-- WRAPPER -->
+    <div class="w-screen
+    h-screen
+    p-2">
+
+        <!-- MAIN -->
+        <div class="w-full
+        h-full
+        bg-[#f8f8f8]
+        rounded-[30px]
+        flex
+        overflow-hidden">
+
+            <!-- SIDEBAR -->
+            <aside class="w-[185px]
+            border-r
+            border-[#dddddd]
+            px-4
+            py-5
+            flex
+            flex-col
+            shrink-0">
+
+                <!-- LOGO -->
+                <div class="flex items-center gap-2 mb-10">
+
+                    <div class="w-7 h-7
+                    rounded-full
+                    bg-[#2348c0]
+                    flex
+                    items-center
+                    justify-center
+                    text-white
+                    text-[13px]">
+
+                        🗑️
+
+                    </div>
+
+                    <h1 class="text-[22px]
+                    font-bold
+                    text-[#2348c0]">
+
+                        MED.TRASH
+
+                    </h1>
+
+                </div>
+
+                <!-- MENU -->
+                <nav class="space-y-3 text-[13px]">
+
+                    <!-- DASHBOARD -->
+                    <a href="/"
+                    class="flex items-center gap-3
+                    px-4 py-3
+                    rounded-[12px]
+                    transition
+
+                    {% if request.path == '/' %}
+                        bg-[#dce8ff]
+                        text-[#2348c0]
+                        font-semibold
+                    {% else %}
+                        hover:bg-[#dce8ff]
+                        hover:text-[#2348c0]
+                    {% endif %}
+                    ">
+
+                        🏠 Dashboard
+
+                    </a>
+
+                    <!-- ANALYTICS -->
+                    <a href="/analytics"
+                    class="flex items-center gap-3
+                    px-4 py-3
+                    rounded-[12px]
+                    transition
+
+                    {% if request.path == '/analytics' %}
+                        bg-[#dce8ff]
+                        text-[#2348c0]
+                        font-semibold
+                    {% else %}
+                        hover:bg-[#dce8ff]
+                        hover:text-[#2348c0]
+                    {% endif %}
+                    ">
+
+                        📈 Analytics
+
+                    </a>
+
+                    <!-- DEVICES -->
+                    <a href="/devices"
+                    class="flex items-center gap-3
+                    px-4 py-3
+                    rounded-[12px]
+                    transition
+
+                    {% if request.path == '/devices' %}
+                        bg-[#dce8ff]
+                        text-[#2348c0]
+                        font-semibold
+                    {% else %}
+                        hover:bg-[#dce8ff]
+                        hover:text-[#2348c0]
+                    {% endif %}
+                    ">
+
+                        💻 Perangkat
+
+                    </a>
+
+                    <!-- HISTORY -->
+                    <a href="/history"
+                    class="flex items-center gap-3
+                    px-4 py-3
+                    rounded-[12px]
+                    transition
+
+                    {% if request.path == '/history' %}
+                        bg-[#dce8ff]
+                        text-[#2348c0]
+                        font-semibold
+                    {% else %}
+                        hover:bg-[#dce8ff]
+                        hover:text-[#2348c0]
+                    {% endif %}
+                    ">
+
+                        📜 History
+
+                    </a>
+
+                </nav>
+
+            </aside>
+
+            <!-- CONTENT -->
+            <main class="flex-1
+            overflow-y-auto
+            flex
+            justify-center">
+
+                <div class="w-full
+                max-w-[1450px]
+                px-6
+                py-5">
+
+                <!-- TOPBAR -->
+                <div class="flex
+                justify-end
+                items-center
+                mb-5">
+
+                    <div class="flex items-center gap-4">
+
+                        <!-- NOTIF -->
+                        <div class="w-10 h-10
+                        rounded-full
+                        bg-[#edf2ff]
+                        flex
+                        items-center
+                        justify-center
+                        text-[14px]">
+
+                            🔔
+
+                        </div>
+
+                        <!-- PROFILE -->
+                        <div class="flex items-center gap-3">
+
+                            <img src="https://i.pravatar.cc/100"
+                            class="w-10 h-10 rounded-full">
+
+                            <p class="text-[14px]
+                            font-semibold">
+
+                                Admin Sampah
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% block content %}
+
+                {% endblock %}
+                
+                </div>
+
+            </main>
+
+        </div>
+
+    </div>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+<script>
+
+const socket = io();
+
+socket.on("new_trash",function(data){
+
+    location.reload();
+
+});
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,562 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<div class="grid grid-cols-12 gap-6">
+
+    <!-- ========================= -->
+    <!-- LEFT CONTENT -->
+    <!-- ========================= -->
+
+    <div class="col-span-12 xl:col-span-9">
+
+        <!-- TITLE -->
+
+        <h1 class="text-[48px] font-bold text-[#2348c0] mb-6">
+
+            {{ page_title }}
+
+        </h1>
+
+        <!-- TOP CARD -->
+
+        <div class="grid lg:grid-cols-3 gap-4">
+
+            <!-- TOTAL -->
+
+            <a href="/analytics"
+            class="lg:col-span-2
+            bg-gradient-to-r
+            from-[#2d6cff]
+            to-[#347dff]
+            rounded-[24px]
+            p-8
+            text-white
+            shadow-sm
+            hover:scale-[1.01]
+            transition">
+
+                <div class="flex justify-between">
+
+                    <div class="w-14 h-14
+                    rounded-full
+                    bg-white/10
+                    flex
+                    items-center
+                    justify-center
+                    text-2xl">
+
+                        🗑️
+
+                    </div>
+
+                    <span class="text-sm">
+
+                        Lihat Detail ↗
+
+                    </span>
+
+                </div>
+
+                <h2 class="text-[72px]
+                font-bold
+                mt-8
+                leading-none">
+
+                    {{ total_trash }}
+
+                </h2>
+
+                <p class="text-lg mt-2">
+
+                    Sampah
+
+                </p>
+
+            </a>
+
+            <!-- RIGHT -->
+
+            <div class="space-y-4">
+
+                <!-- MEDIS -->
+
+                <div class="bg-[#edf2fa]
+                rounded-[20px]
+                p-5
+                flex
+                items-center
+                gap-4">
+
+                    <div class="w-12 h-12
+                    rounded-full
+                    border-2
+                    border-[#2d6cff]
+                    flex
+                    items-center
+                    justify-center">
+
+                        ➕
+
+                    </div>
+
+                    <div>
+
+                        <h3 class="text-3xl
+                        font-bold
+                        text-[#2348c0]">
+
+                            {{ medis_count }}
+
+                        </h3>
+
+                        <p class="text-gray-500">
+
+                            Medical Trash
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- NON MEDIS -->
+
+                <div class="bg-white
+                border
+                rounded-[20px]
+                p-5
+                flex
+                items-center
+                gap-4">
+
+                    <div class="w-12 h-12
+                    rounded-full
+                    border-2
+                    border-[#7da8ff]
+                    flex
+                    items-center
+                    justify-center">
+
+                        🚫
+
+                    </div>
+
+                    <div>
+
+                        <h3 class="text-3xl
+                        font-bold
+                        text-[#2348c0]">
+
+                            {{ non_medis_count }}
+
+                        </h3>
+
+                        <p class="text-gray-500">
+
+                            Non Medical Trash
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- CHART -->
+
+        <div class="mt-6
+        bg-white
+        border
+        border-[#dbe5ff]
+        rounded-[24px]
+        p-6">
+
+            <h2 class="text-[28px]
+            font-bold
+            text-[#2348c0]
+            mb-5">
+
+                Statistik Sampah Per Hari
+
+            </h2>
+
+            <div id="chart"></div>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="mt-6">
+
+            <h2 class="text-[28px]
+            font-bold
+            text-[#2348c0]
+            mb-4">
+
+                Riwayat Deteksi Sampah
+
+            </h2>
+
+            <div class="bg-white
+            rounded-[20px]
+            overflow-hidden
+            border">
+
+                <table class="w-full">
+
+                    <thead>
+
+                        <tr class="bg-[#2348c0] text-white">
+
+                            <th class="p-4 text-left">
+                                Gambar
+                            </th>
+
+                            <th class="p-4 text-left">
+                                Kategori
+                            </th>
+
+                            <th class="p-4 text-left">
+                                Jenis
+                            </th>
+
+                            <th class="p-4 text-left">
+                                Confidence
+                            </th>
+
+                            <th class="p-4 text-left">
+                                Jam
+                            </th>
+
+                            <th class="p-4 text-left">
+                                Tanggal
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for log in logs %}
+
+                        <tr class="border-b hover:bg-gray-50">
+
+                            <td class="p-4">
+
+                                {% if log.image_path %}
+
+                            <img
+                                src="{{ url_for('static', filename=log.image_path) }}"
+                                class="w-20 h-20 object-cover rounded-lg"
+                                style="
+                                width:80px;
+                                height:80px;
+                                object-fit:cover;
+                                border-radius:12px;
+                                border:1px solid #ddd;
+                                "
+                                class="hover:scale-110 transition duration-200">
+
+                                {% else %}
+
+                                <span class="text-gray-400">
+
+                                    No Image
+
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td class="p-4">
+
+                                {% if log.kategori == 'Medical' %}
+
+                                    <span class="px-3 py-1 rounded-full bg-red-100 text-red-600">
+
+                                        Medical
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-600">
+
+                                        Non Medical
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td class="p-4">
+
+                                {{ log.jenis_sampah }}
+
+                            </td>
+
+                            <td class="p-4">
+
+                                {{ "%.2f"|format(log.confidence * 100) }}%
+
+                            </td>
+
+                            <td class="p-4">
+
+                                {{ log.created_at.strftime('%H:%M') }}
+
+                            </td>
+
+                            <td class="p-4">
+
+                                {{ log.created_at.strftime('%d %b %Y') }}
+
+                            </td>
+
+                        </tr>
+
+                        {% else %}
+
+                        <tr>
+
+                            <td colspan="6"
+                            class="text-center p-10 text-gray-400">
+
+                                Belum ada data sampah
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ========================= -->
+    <!-- RIGHT PANEL -->
+    <!-- ========================= -->
+
+    <div class="col-span-12 xl:col-span-3">
+
+        <!-- CALENDAR -->
+
+        <div class="bg-white
+        rounded-[24px]
+        border
+        border-[#dbe5ff]
+        p-6">
+
+            <div class="flex
+            justify-between
+            items-center
+            mb-6">
+
+                <h3 class="text-[32px]
+                font-bold
+                text-[#2348c0]">
+
+                    {{ month_name }}
+                    {{ selected_year }}
+
+                </h3>
+
+                <div class="flex gap-3">
+
+                    <a href="/?month={{ prev_month }}&year={{ prev_year }}"
+                    class="w-10 h-10 rounded-full bg-[#eef3ff] flex items-center justify-center">
+
+                        ❮
+
+                    </a>
+
+                    <a href="/?month={{ next_month }}&year={{ next_year }}"
+                    class="w-10 h-10 rounded-full bg-[#eef3ff] flex items-center justify-center">
+
+                        ❯
+
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="grid grid-cols-7 text-center text-gray-400 mb-3">
+
+                <div>S</div>
+                <div>M</div>
+                <div>T</div>
+                <div>W</div>
+                <div>T</div>
+                <div>F</div>
+                <div>S</div>
+
+            </div>
+
+            {% for week in month_matrix %}
+
+            <div class="grid grid-cols-7 mb-2">
+
+                {% for day in week %}
+
+                    {% if day == 0 %}
+
+                        <div></div>
+
+                    {% else %}
+
+                        {% set current_date = '%04d-%02d-%02d'|format(selected_year, selected_month, day) %}
+
+                        <a href="/?date={{ current_date }}&month={{ selected_month }}&year={{ selected_year }}"
+
+                        class="w-11 h-11
+                        rounded-full
+                        mx-auto
+                        flex
+                        items-center
+                        justify-center
+
+                        {% if selected_date.day == day and selected_date.month == selected_month and selected_date.year == selected_year %}
+
+                            bg-[#2d6cff] text-white
+
+                        {% elif today.day == day and today.month == selected_month and today.year == selected_year %}
+
+                            bg-[#22c55e] text-white
+
+                        {% endif %}">
+
+                            {{ day }}
+
+                        </a>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        <!-- PROGRESS -->
+
+        <div class="mt-6">
+
+            <h3 class="font-bold text-2xl mb-2">
+
+                Tempat Sampah Medis
+
+            </h3>
+
+            <div class="w-full h-3 bg-gray-200 rounded-full">
+
+                <div class="w-[76%] h-3 bg-yellow-400 rounded-full"></div>
+
+            </div>
+
+        </div>
+
+        <div class="mt-8">
+
+            <h3 class="font-bold text-2xl mb-2">
+
+                Tempat Sampah Non-Medis
+
+            </h3>
+
+            <div class="w-full h-3 bg-gray-200 rounded-full">
+
+                <div class="w-[65%] h-3 bg-blue-500 rounded-full"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script id="chart-data" type="application/json">
+{
+    "labels": {{ hour_labels|tojson }},
+    "medical": {{ medical_hourly|tojson }},
+    "nonmedical": {{ non_medical_hourly|tojson }}
+}
+</script>
+
+<script>
+
+const chartData = JSON.parse(
+    document.getElementById("chart-data").textContent
+);
+
+var options = {
+
+    chart:{
+        type:'line',
+        height:320,
+        toolbar:{show:false}
+    },
+
+    series:[
+
+        {
+            name:'Non-Medis',
+            data: chartData.nonmedical
+        },
+
+        {
+            name:'Medis',
+            data: chartData.medical
+        }
+
+    ],
+
+    xaxis:{
+        categories: chartData.labels
+    },
+
+    stroke:{
+        curve:'smooth',
+        width:4
+    },
+
+    colors:[
+        '#2bc445',
+        '#10bce2'
+    ],
+
+    dataLabels:{
+        enabled:false
+    },
+
+    legend:{
+        position:'bottom'
+    }
+
+};
+
+new ApexCharts(
+    document.querySelector("#chart"),
+    options
+).render();
+</script>
+
+{% endblock %}
